@@ -57,9 +57,9 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
       if (data.length === 0) {
         console.log("Seeding initial categories...");
         const initialCategories = [
-          { id: randomUUID(), name: 'Pribadi', color: '#3B82F6', icon: 'person', createdAt: Date.now() },
-          { id: randomUUID(), name: 'Pekerjaan', color: '#EF4444', icon: 'briefcase', createdAt: Date.now() + 1 },
-          { id: randomUUID(), name: 'Belanja', color: '#10B981', icon: 'cart', createdAt: Date.now() + 2 },
+          { id: randomUUID(), name: 'Personal', color: '#3B82F6', icon: 'person', createdAt: Date.now() },
+          { id: randomUUID(), name: 'Work', color: '#EF4444', icon: 'briefcase', createdAt: Date.now() + 1 },
+          { id: randomUUID(), name: 'Shopping', color: '#10B981', icon: 'cart', createdAt: Date.now() + 2 },
         ];
         
         for (const cat of initialCategories) {

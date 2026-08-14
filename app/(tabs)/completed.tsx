@@ -22,12 +22,12 @@ export default function CompletedScreen() {
 
   const handleClearAll = () => {
     Alert.alert(
-      "Hapus Semua Riwayat",
-      "Anda yakin ingin menghapus semua tugas yang telah diselesaikan? Aksi ini tidak dapat dibatalkan.",
+      "Clear All History",
+      "Are you sure you want to delete all completed tasks? This action cannot be undone.",
       [
-        { text: "Batal", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         { 
-          text: "Hapus Semua", 
+          text: "Clear All", 
           style: "destructive", 
           onPress: () => clearCompletedTasks() 
         }
@@ -39,8 +39,8 @@ export default function CompletedScreen() {
     <SafeAreaView className="flex-1 bg-background pt-8">
       <View className="px-6 mb-4 mt-4 flex-row justify-between items-center">
         <View>
-          <Text className="text-3xl font-bold text-textPrimary">Selesai</Text>
-          <Text className="text-textSecondary mt-1">Riwayat tugas yang telah Anda selesaikan.</Text>
+          <Text className="text-3xl font-bold text-textPrimary">Completed</Text>
+          <Text className="text-textSecondary mt-1">History of tasks you have completed.</Text>
         </View>
         <View className="flex-row items-center">
           <Pressable 
@@ -61,8 +61,8 @@ export default function CompletedScreen() {
         {completedTasks.length === 0 ? (
           <EmptyState 
             icon="checkmark-done-circle-outline" 
-            title="Belum ada yang selesai" 
-            message="Selesaikan tugas di halaman utama, riwayatnya akan muncul di sini." 
+            title="Nothing completed yet" 
+            message="Complete tasks on the main page, and their history will appear here." 
           />
         ) : (
           <FlatList

@@ -59,8 +59,8 @@ export default function HomeScreen() {
       {/* Header */}
       <View className="px-6 mb-4 mt-4 flex-row justify-between items-center">
         <View>
-          <Text className="text-3xl font-bold text-textPrimary">Halo, {firstName} 👋</Text>
-          <Text className="text-textSecondary mt-1">Fokus pada apa yang penting hari ini.</Text>
+          <Text className="text-3xl font-bold text-textPrimary">Hello, {firstName} 👋</Text>
+          <Text className="text-textSecondary mt-1">Focus on what matters today.</Text>
         </View>
         <View className="flex-row items-center">
           <Pressable 
@@ -95,7 +95,7 @@ export default function HomeScreen() {
               className={`px-4 py-2 rounded-full mr-2 ${!selectedCategoryFilter ? 'bg-primary' : 'bg-surface'}`}
             >
               <Text className={`font-semibold ${!selectedCategoryFilter ? 'text-white' : 'text-textSecondary'}`}>
-                Semua
+                All
               </Text>
             </Pressable>
             {categories.map((c) => (
@@ -122,8 +122,8 @@ export default function HomeScreen() {
         {!isLoading && (
           todayTasks.length === 0 ? (
             <EmptyState 
-              title="Semua selesai!" 
-              message="Kamu tidak memiliki tugas tersisa untuk hari ini. Waktunya bersantai!" 
+              title="All done!" 
+              message="You have no tasks left for today. Time to relax!" 
               icon="partly-sunny-outline" 
             />
           ) : (

@@ -7,7 +7,7 @@ import { useTaskStore } from '../store/useTaskStore';
 import { TaskCard } from '../components/task/TaskCard';
 import { EmptyState } from '../components/ui/EmptyState';
 import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
+import { enUS as localeId } from 'date-fns/locale';
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -46,7 +46,7 @@ export default function SearchScreen() {
             ref={inputRef}
             value={query}
             onChangeText={setQuery}
-            placeholder="Cari tugas atau catatan..."
+            placeholder="Search tasks or notes..."
             placeholderTextColor="#94A3B8"
             className="flex-1 ml-2 text-textPrimary text-base"
             returnKeyType="search"
@@ -69,13 +69,13 @@ export default function SearchScreen() {
           <View className="flex-1 justify-center items-center px-8 opacity-50">
             <Ionicons name="search" size={64} color="#CBD5E1" />
             <Text className="text-textSecondary text-center mt-4 text-base">
-              Ketik judul atau catatan tugas untuk mulai mencari.
+              Type a task title or notes to start searching.
             </Text>
           </View>
         ) : searchResults.length === 0 ? (
           <EmptyState 
-            title="Tidak ditemukan" 
-            message={`Kami tidak dapat menemukan tugas dengan kata kunci "${query}".`} 
+            title="Not found" 
+            message={`We couldn't find any tasks with keyword "${query}".`} 
             icon="search-outline" 
           />
         ) : (
@@ -88,8 +88,8 @@ export default function SearchScreen() {
                 <View className="flex-row items-center mb-2 px-1">
                   <View className={`w-2 h-2 rounded-full mr-2 ${item.isCompleted ? 'bg-green-500' : 'bg-primary'}`} />
                   <Text className="text-xs text-textSecondary font-medium">
-                    {item.isCompleted ? 'Selesai' : (
-                      item.dueDate ? format(new Date(item.dueDate), 'dd MMM yyyy', { locale: id }) : 'Hari Ini'
+                    {item.isCompleted ? 'Completed' : (
+                      item.dueDate ? format(new Date(item.dueDate), 'dd MMM yyyy', { locale: localeId }) : 'Today'
                     )}
                   </Text>
                 </View>

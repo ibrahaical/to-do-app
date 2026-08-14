@@ -31,9 +31,9 @@ export default function TaskDetailScreen() {
   if (!task) {
     return (
       <View className="flex-1 justify-center items-center bg-background">
-        <Text className="text-textPrimary">Task tidak ditemukan.</Text>
+        <Text className="text-textPrimary">Task not found.</Text>
         <Pressable onPress={() => router.back()} className="mt-4 bg-primary px-4 py-2 rounded-lg">
-          <Text className="text-white font-semibold">Kembali</Text>
+          <Text className="text-white font-semibold">Back</Text>
         </Pressable>
       </View>
     );
@@ -41,7 +41,7 @@ export default function TaskDetailScreen() {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      Alert.alert('Error', 'Judul tidak boleh kosong');
+      Alert.alert('Error', 'Title cannot be empty');
       return;
     }
     
@@ -57,12 +57,12 @@ export default function TaskDetailScreen() {
 
   const handleDelete = () => {
     Alert.alert(
-      'Hapus Tugas',
-      'Yakin ingin menghapus tugas ini?',
+      'Delete Task',
+      'Are you sure you want to delete this task?',
       [
-        { text: 'Batal', style: 'cancel' },
+        { text: 'Cancel', style: 'cancel' },
         { 
-          text: 'Hapus', 
+          text: 'Delete', 
           style: 'destructive', 
           onPress: async () => {
             await deleteTask(task.id);
@@ -83,7 +83,7 @@ export default function TaskDetailScreen() {
         <View className="flex-row gap-2">
           {isEditing ? (
             <Pressable onPress={handleSave} className="bg-primary px-4 py-2 rounded-full">
-              <Text className="text-white font-semibold">Simpan</Text>
+              <Text className="text-white font-semibold">Save</Text>
             </Pressable>
           ) : (
             <Pressable onPress={() => setIsEditing(true)} className="bg-sky-100 px-4 py-2 rounded-full">
@@ -100,19 +100,19 @@ export default function TaskDetailScreen() {
               value={title}
               onChangeText={setTitle}
               className="text-2xl font-bold text-textPrimary border-b border-gray-200 pb-2 mb-4"
-              placeholder="Judul Tugas"
+              placeholder="Task Title"
               autoFocus
             />
             <TextInput
               value={notes}
               onChangeText={setNotes}
               className="text-base text-textSecondary bg-gray-50 p-4 rounded-xl h-32 mb-4"
-              placeholder="Catatan tambahan..."
+              placeholder="Additional notes..."
               multiline
               textAlignVertical="top"
             />
             
-            <Text className="text-sm font-semibold text-textSecondary mb-2">KATEGORI</Text>
+            <Text className="text-sm font-semibold text-textSecondary mb-2">CATEGORY</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
               {categories.map((c) => (
                 <Pressable
@@ -132,13 +132,13 @@ export default function TaskDetailScreen() {
               ))}
             </ScrollView>
             
-            <Text className="text-sm font-semibold text-textSecondary mb-2">TANGGAL TENGGAT</Text>
+            <Text className="text-sm font-semibold text-textSecondary mb-2">DUE DATE</Text>
             <Pressable 
               onPress={() => setShowDatePicker(true)}
               className="bg-gray-50 p-4 rounded-xl mb-2 flex-row justify-between items-center border border-gray-100"
             >
               <Text className="text-base text-textPrimary">
-                {dueDate ? dueDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Pilih Tanggal'}
+                {dueDate ? dueDate.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Select Date'}
               </Text>
               <Ionicons name="calendar-outline" size={20} color="#94A3B8" />
             </Pressable>
@@ -170,7 +170,7 @@ export default function TaskDetailScreen() {
                 {task.notes}
               </Text>
             ) : (
-              <Text className="text-base text-gray-400 italic">Tidak ada catatan tambahan.</Text>
+              <Text className="text-base text-gray-400 italic">No additional notes.</Text>
             )}
           </View>
         )}
@@ -181,10 +181,10 @@ export default function TaskDetailScreen() {
               <View className="w-8 h-8 bg-sky-50 rounded-full items-center justify-center mr-3">
                 <Ionicons name="calendar" size={18} color="#0284C7" />
               </View>
-              <Text className="text-textSecondary font-medium">Tenggat</Text>
+              <Text className="text-textSecondary font-medium">Due Date</Text>
             </View>
             <Text className="font-semibold text-textPrimary">
-              {task.dueDate ? new Date(task.dueDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : 'Tidak ada'}
+              {task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }) : 'None'}
             </Text>
           </View>
 
@@ -203,7 +203,7 @@ export default function TaskDetailScreen() {
               className={`px-4 py-2 rounded-full ${task.isCompleted ? 'bg-green-100' : 'bg-gray-100'}`}
             >
               <Text className={`font-semibold ${task.isCompleted ? 'text-green-600' : 'text-gray-600'}`}>
-                {task.isCompleted ? 'Selesai' : 'Berjalan'}
+                {task.isCompleted ? 'Completed' : 'In Progress'}
               </Text>
             </Pressable>
           </View>
@@ -213,7 +213,7 @@ export default function TaskDetailScreen() {
               <View className="w-8 h-8 bg-orange-100 rounded-full items-center justify-center mr-3">
                 <Ionicons name="flag" size={18} color="#F59E0B" />
               </View>
-              <Text className="text-textSecondary font-medium">Prioritas</Text>
+              <Text className="text-textSecondary font-medium">Priority</Text>
             </View>
             <Text className="font-semibold text-textPrimary capitalize">{task.priority}</Text>
           </View>
@@ -225,7 +225,7 @@ export default function TaskDetailScreen() {
             className="mt-6 flex-row items-center justify-center bg-red-50 p-4 rounded-2xl"
           >
             <Ionicons name="trash-outline" size={20} color="#EF4444" className="mr-2" />
-            <Text className="text-red-500 font-semibold ml-2">Hapus Tugas</Text>
+            <Text className="text-red-500 font-semibold ml-2">Delete Task</Text>
           </Pressable>
         )}
       </View>

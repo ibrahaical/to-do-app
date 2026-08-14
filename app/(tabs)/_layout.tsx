@@ -31,16 +31,16 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Hari Ini',
+          title: 'Today',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar-clear-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="upcoming"
+        name="calendar"
         options={{
-          title: 'Mendatang',
+          title: 'Calendar',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar-outline" size={size} color={color} />
           ),
@@ -49,7 +49,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="completed"
         options={{
-          title: 'Selesai',
+          title: 'Completed',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="checkmark-done-circle-outline" size={size} color={color} />
           ),
@@ -58,7 +58,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Pengaturan',
+          title: 'Settings',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),

@@ -48,12 +48,12 @@ export default function SettingsScreen() {
 
   const handleResetData = () => {
     Alert.alert(
-      "Reset Data Aplikasi",
-      "PERINGATAN KERAS: Semua tugas, jadwal, dan riwayat akan dihapus secara permanen. Anda akan dikembalikan ke layar perkenalan. Yakin ingin melanjutkan?",
+      "Reset App Data",
+      "WARNING: All tasks, schedules, and history will be permanently deleted. You will be returned to the onboarding screen. Are you sure you want to proceed?",
       [
-        { text: "Batal", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         { 
-          text: "Reset Total", 
+          text: "Reset All", 
           style: "destructive", 
           onPress: async () => {
             await clearAllData();
@@ -68,7 +68,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background pt-8">
       <View className="px-6 mb-8 mt-4">
-        <Text className="text-3xl font-bold text-textPrimary mb-6">Pengaturan</Text>
+        <Text className="text-3xl font-bold text-textPrimary mb-6">Settings</Text>
         
         {/* Profile Section */}
         <View className="flex-row items-center bg-surface p-4 rounded-2xl mb-2">
@@ -76,13 +76,13 @@ export default function SettingsScreen() {
             <Text className="text-white text-xl font-bold">{getInitials(localName)}</Text>
           </View>
           <View className="flex-1">
-            <Text className="text-sm text-textSecondary font-medium mb-1">Nama Profil</Text>
+            <Text className="text-sm text-textSecondary font-medium mb-1">Profile Name</Text>
             <TextInput 
               value={localName}
               onChangeText={setLocalName}
-              onBlur={() => setUserName(localName.trim() || 'Pengguna')}
+              onBlur={() => setUserName(localName.trim() || 'User')}
               className="text-xl font-bold text-textPrimary py-0"
-              placeholder="Masukkan nama..."
+              placeholder="Enter name..."
               placeholderTextColor="#94A3B8"
               returnKeyType="done"
             />
@@ -91,7 +91,7 @@ export default function SettingsScreen() {
       </View>
 
       <View className="px-6">
-        <Text className="text-sm font-semibold text-textSecondary uppercase tracking-wider mb-4">Sistem</Text>
+        <Text className="text-sm font-semibold text-textSecondary uppercase tracking-wider mb-4">System</Text>
         
         <View className="bg-surface rounded-2xl p-4 mb-8">
           <Pressable 
@@ -102,27 +102,27 @@ export default function SettingsScreen() {
               <View className="w-8 h-8 bg-purple-100 rounded-full items-center justify-center mr-3">
                 <Ionicons name="notifications-outline" size={18} color="#9333EA" />
               </View>
-              <Text className="text-textPrimary text-base font-medium">Izin Notifikasi</Text>
+              <Text className="text-textPrimary text-base font-medium">Notification Permission</Text>
             </View>
             <View className="flex-row items-center">
               <Text className={`font-semibold mr-2 ${hasNotificationPermission ? 'text-green-500' : 'text-red-500'}`}>
-                {hasNotificationPermission ? 'Aktif' : 'Terblokir'}
+                {hasNotificationPermission ? 'Active' : 'Blocked'}
               </Text>
               <Ionicons name="chevron-forward" size={20} color="#94A3B8" />
             </View>
           </Pressable>
         </View>
 
-        <Text className="text-sm font-semibold text-textSecondary uppercase tracking-wider mb-4">Tentang</Text>
+        <Text className="text-sm font-semibold text-textSecondary uppercase tracking-wider mb-4">About</Text>
         
         <View className="bg-surface rounded-2xl p-4 mb-8">
           <View className="flex-row justify-between items-center py-2">
-            <Text className="text-textPrimary text-base">Versi Aplikasi</Text>
+            <Text className="text-textPrimary text-base">App Version</Text>
             <Text className="text-textSecondary">1.0.0 (Beta)</Text>
           </View>
         </View>
 
-        <Text className="text-sm font-semibold text-textSecondary uppercase tracking-wider mb-4">Zona Berbahaya</Text>
+        <Text className="text-sm font-semibold text-textSecondary uppercase tracking-wider mb-4">Danger Zone</Text>
 
         <View className="bg-surface rounded-2xl p-4">
           <Pressable 
@@ -133,10 +133,10 @@ export default function SettingsScreen() {
               <View className="w-8 h-8 bg-red-100 rounded-full items-center justify-center mr-3">
                 <Ionicons name="warning-outline" size={18} color="#EF4444" />
               </View>
-              <Text className="text-red-500 text-base font-bold">Reset Data Aplikasi</Text>
+              <Text className="text-red-500 text-base font-bold">Reset App Data</Text>
             </View>
           </Pressable>
-          <Text className="text-xs text-textSecondary mt-2">Tindakan ini akan menghapus semua tugas dan pengaturan secara permanen.</Text>
+          <Text className="text-xs text-textSecondary mt-2">This action will permanently delete all tasks and settings.</Text>
         </View>
       </View>
     </SafeAreaView>

@@ -43,7 +43,7 @@ export default function OnboardingScreen() {
             to-do, done right
           </Text>
           <Text className="text-base text-white/80 text-center leading-relaxed px-4">
-            Ubah tugas harianmu menjadi kemenangan kecil dengan pengalaman to-do list yang cantik dan intuitif.
+            Turn your daily tasks into small wins with a beautiful and intuitive to-do list experience.
           </Text>
         </Animated.View>
       </View>
@@ -54,7 +54,7 @@ export default function OnboardingScreen() {
           onPress={requestPermissions}
           className="bg-white py-4 rounded-full shadow-lg items-center"
         >
-          <Text className="text-primary font-bold text-lg">Mulai Sekarang</Text>
+          <Text className="text-primary font-bold text-lg">Get Started</Text>
         </Pressable>
       </Animated.View>
     </SafeAreaView>

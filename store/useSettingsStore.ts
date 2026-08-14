@@ -14,10 +14,10 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       hasOnboarded: false,
-      userName: 'Pengguna',
+      userName: 'User',
       setHasOnboarded: (value) => set({ hasOnboarded: value }),
       setUserName: (name) => set({ userName: name }),
-      resetSettings: () => set({ hasOnboarded: false, userName: 'Pengguna' }),
+      resetSettings: () => set({ hasOnboarded: false, userName: 'User' }),
     }),
     {
       name: 'settings-storage',
