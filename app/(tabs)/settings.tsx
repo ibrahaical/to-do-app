@@ -66,79 +66,89 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background pt-8">
-      <View className="px-6 mb-8 mt-4">
-        <Text className="text-3xl font-bold text-textPrimary mb-6">Settings</Text>
-        
-        {/* Profile Section */}
-        <View className="flex-row items-center bg-surface p-4 rounded-2xl mb-2">
-          <View className="w-16 h-16 bg-primary rounded-full items-center justify-center mr-4">
-            <Text className="text-white text-xl font-bold">{getInitials(localName)}</Text>
-          </View>
-          <View className="flex-1">
-            <Text className="text-sm text-textSecondary font-medium mb-1">Profile Name</Text>
-            <TextInput 
-              value={localName}
-              onChangeText={setLocalName}
-              onBlur={() => setUserName(localName.trim() || 'User')}
-              className="text-xl font-bold text-textPrimary py-0"
-              placeholder="Enter name..."
-              placeholderTextColor="#94A3B8"
-              returnKeyType="done"
-            />
-          </View>
+    <SafeAreaView className="flex-1 bg-background pt-4">
+      {/* HEADER SECTION */}
+      <View className="px-6 h-12 justify-center mb-2">
+        <Text className="text-3xl font-bold text-textPrimary">Settings</Text>
+      </View>
+
+      {/* Profile Section */}
+      <View className="bg-background pt-4 pb-2 px-6">
+        <Text className="text-sm font-bold text-textPrimary">Profile</Text>
+      </View>
+      
+      <View className="bg-white border-y border-gray-100 py-4 px-6 flex-row items-center">
+        <View className="w-14 h-14 bg-primary rounded-full items-center justify-center mr-4">
+          <Text className="text-white text-lg font-bold">{getInitials(localName)}</Text>
+        </View>
+        <View className="flex-1">
+          <Text className="text-xs text-textSecondary font-medium mb-1 uppercase tracking-wider">Display Name</Text>
+          <TextInput 
+            value={localName}
+            onChangeText={setLocalName}
+            onBlur={() => setUserName(localName.trim() || 'User')}
+            className="text-lg font-bold text-textPrimary py-0"
+            placeholder="Enter name..."
+            placeholderTextColor="#94A3B8"
+            returnKeyType="done"
+          />
         </View>
       </View>
 
-      <View className="px-6">
-        <Text className="text-sm font-semibold text-textSecondary uppercase tracking-wider mb-4">System</Text>
-        
-        <View className="bg-surface rounded-2xl p-4 mb-8">
-          <Pressable 
-            className="flex-row justify-between items-center py-2"
-            onPress={() => Linking.openSettings()}
-          >
-            <View className="flex-row items-center">
-              <View className="w-8 h-8 bg-purple-100 rounded-full items-center justify-center mr-3">
-                <Ionicons name="notifications-outline" size={18} color="#9333EA" />
-              </View>
-              <Text className="text-textPrimary text-base font-medium">Notification Permission</Text>
-            </View>
-            <View className="flex-row items-center">
-              <Text className={`font-semibold mr-2 ${hasNotificationPermission ? 'text-green-500' : 'text-red-500'}`}>
-                {hasNotificationPermission ? 'Active' : 'Blocked'}
-              </Text>
-              <Ionicons name="chevron-forward" size={20} color="#94A3B8" />
-            </View>
-          </Pressable>
-        </View>
-
-        <Text className="text-sm font-semibold text-textSecondary uppercase tracking-wider mb-4">About</Text>
-        
-        <View className="bg-surface rounded-2xl p-4 mb-8">
-          <View className="flex-row justify-between items-center py-2">
-            <Text className="text-textPrimary text-base">App Version</Text>
-            <Text className="text-textSecondary">1.0.0 (Beta)</Text>
-          </View>
-        </View>
-
-        <Text className="text-sm font-semibold text-textSecondary uppercase tracking-wider mb-4">Danger Zone</Text>
-
-        <View className="bg-surface rounded-2xl p-4">
-          <Pressable 
-            className="flex-row justify-between items-center py-2"
-            onPress={handleResetData}
-          >
-            <View className="flex-row items-center">
-              <View className="w-8 h-8 bg-red-100 rounded-full items-center justify-center mr-3">
-                <Ionicons name="warning-outline" size={18} color="#EF4444" />
-              </View>
-              <Text className="text-red-500 text-base font-bold">Reset App Data</Text>
-            </View>
-          </Pressable>
-          <Text className="text-xs text-textSecondary mt-2">This action will permanently delete all tasks and settings.</Text>
-        </View>
+      {/* System Section */}
+      <View className="bg-background pt-6 pb-2 px-6">
+        <Text className="text-sm font-bold text-textPrimary">System</Text>
       </View>
+      
+      <Pressable 
+        className="bg-white border-y border-gray-100 flex-row justify-between items-center py-4 px-6"
+        onPress={() => Linking.openSettings()}
+      >
+        <View className="flex-row items-center">
+          <View className="w-8 h-8 items-center justify-center mr-3">
+            <Ionicons name="notifications-outline" size={22} color="#64748B" />
+          </View>
+          <Text className="text-textPrimary text-base font-medium">Notification Permission</Text>
+        </View>
+        <View className="flex-row items-center">
+          <Text className={`font-semibold mr-2 ${hasNotificationPermission ? 'text-green-500' : 'text-red-500'}`}>
+            {hasNotificationPermission ? 'Active' : 'Blocked'}
+          </Text>
+          <Ionicons name="chevron-forward" size={18} color="#CBD5E1" />
+        </View>
+      </Pressable>
+
+      {/* About Section */}
+      <View className="bg-background pt-6 pb-2 px-6">
+        <Text className="text-sm font-bold text-textPrimary">About</Text>
+      </View>
+      
+      <View className="bg-white border-y border-gray-100 flex-row justify-between items-center py-4 px-6">
+        <Text className="text-textPrimary text-base font-medium">App Version</Text>
+        <Text className="text-textSecondary font-medium">1.0.0 (Beta)</Text>
+      </View>
+
+      {/* Danger Zone Section */}
+      <View className="bg-background pt-6 pb-2 px-6">
+        <Text className="text-sm font-bold text-red-500">Danger Zone</Text>
+      </View>
+      
+      <Pressable 
+        className="bg-white border-y border-gray-100 py-4 px-6"
+        onPress={handleResetData}
+      >
+        <View className="flex-row justify-between items-center">
+          <View className="flex-row items-center">
+            <View className="w-8 h-8 items-center justify-center mr-3">
+              <Ionicons name="warning-outline" size={22} color="#64748B" />
+            </View>
+            <Text className="text-red-500 text-base font-bold">Reset App Data</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#CBD5E1" />
+        </View>
+        <Text className="text-xs text-textSecondary mt-2 ml-12">This action will permanently delete all tasks and settings.</Text>
+      </Pressable>
+
     </SafeAreaView>
   );
 }

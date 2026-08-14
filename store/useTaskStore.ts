@@ -10,6 +10,7 @@ const mapDbRowToTask = (row: typeof tasks.$inferSelect): Task => ({
   ...row,
   isCompleted: row.isCompleted === 1,
   priority: row.priority as "low" | "medium" | "high",
+  status: row.status as "todo" | "in_progress" | "done",
 });
 
 interface TaskState {
@@ -47,7 +48,9 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       ...input,
       id,
       priority: (input.priority || 'medium') as 'low' | 'medium' | 'high',
-      isCompleted: 0,
+      status: (input.status || 'todo') as 'todo' | 'in_progress' | 'done',
+      isCompleted: input.status === 'done' ? 1 : 0,
+      completedAt: input.status === 'done' ? now : null,
       createdAt: now,
       updatedAt: now,
       orderIndex: input.orderIndex || 0,
@@ -91,7 +94,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       }
     }
 
-    const updateData = { ...input, notificationId, updatedAt: Date.now() };
+    const updateData: any = { ...input, notificationId, updatedAt: Date.now() };
+    
+    if (input.status) {
+      updateData.isCompleted = input.status === 'done' ? 1 : 0;
+      updateData.completedAt = input.status === 'done' ? Date.now() : null;
+    }
     
     // Optimistic update
     set((state) => ({
@@ -120,7 +128,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     // Optimistic update
     set((state) => ({
       tasks: state.tasks.map(t => 
-        t.id === id ? { ...t, isCompleted: newStatus, completedAt } : t
+        t.id === id ? { ...t, isCompleted: newStatus, status: newStatus ? 'done' : 'todo', completedAt } : t
       )
     }));
 

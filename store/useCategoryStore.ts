@@ -54,12 +54,22 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
   seedCategories: async () => {
     try {
       const data = await CategoryQueries.getCategories();
-      if (data.length === 0) {
+      // Paksa sinkronisasi jika kategori kurang dari 6 (artinya masih pakai data lama)
+      if (data.length < 6) {
         console.log("Seeding initial categories...");
+        
+        // Hapus kategori lama terlebih dahulu agar tidak duplikat
+        for (const oldCat of data) {
+          await CategoryQueries.deleteCategory(oldCat.id);
+        }
+
         const initialCategories = [
-          { id: randomUUID(), name: 'Personal', color: '#3B82F6', icon: 'person', createdAt: Date.now() },
-          { id: randomUUID(), name: 'Work', color: '#EF4444', icon: 'briefcase', createdAt: Date.now() + 1 },
-          { id: randomUUID(), name: 'Shopping', color: '#10B981', icon: 'cart', createdAt: Date.now() + 2 },
+          { id: randomUUID(), name: 'Work', color: '#EF4444', icon: 'briefcase', createdAt: Date.now() },
+          { id: randomUUID(), name: 'Education', color: '#8B5CF6', icon: 'book', createdAt: Date.now() + 1 },
+          { id: randomUUID(), name: 'Personal', color: '#3B82F6', icon: 'person', createdAt: Date.now() + 2 },
+          { id: randomUUID(), name: 'Shopping', color: '#10B981', icon: 'cart', createdAt: Date.now() + 3 },
+          { id: randomUUID(), name: 'Finance', color: '#F59E0B', icon: 'wallet', createdAt: Date.now() + 4 },
+          { id: randomUUID(), name: 'Others', color: '#6B7280', icon: 'options', createdAt: Date.now() + 5 },
         ];
         
         for (const cat of initialCategories) {

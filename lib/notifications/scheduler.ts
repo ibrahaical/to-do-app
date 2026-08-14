@@ -22,7 +22,7 @@ export async function scheduleTaskReminder(task: Task | (Omit<Task, "id"> & { id
   try {
     const id = await Notifications.scheduleNotificationAsync({
       content: {
-        title: "⏰ Waktunya Task Anda!",
+        title: "⏰ Task Reminder",
         body: task.title,
         data: { taskId: task.id },
         sound: true,

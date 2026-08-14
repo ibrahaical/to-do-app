@@ -12,11 +12,13 @@ import {
 import { enUS as localeId } from 'date-fns/locale';
 
 import { useTaskStore } from '../../store/useTaskStore';
+import { useCategoryStore } from '../../store/useCategoryStore';
 import { EmptyState } from '../../components/ui/EmptyState';
 
 export default function CalendarScreen() {
   const router = useRouter();
   const tasks = useTaskStore(state => state.tasks);
+  const categories = useCategoryStore(state => state.categories);
   
   // States
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -186,9 +188,9 @@ export default function CalendarScreen() {
             const dateStr = format(date, 'yyyy-MM-dd');
             const dayTasks = tasksByDate[dateStr] || [];
             
-            // Calc priority dots
-            const priorities = Array.from(new Set(dayTasks.map(t => t.priority)));
-            const dots = priorities.slice(0, 3); // Max 3 dots
+            // Calc status dots
+            const statuses = Array.from(new Set(dayTasks.map(t => t.status)));
+            const dots = statuses.slice(0, 3); // Max 3 dots
 
             return (
               <Pressable 
@@ -209,7 +211,7 @@ export default function CalendarScreen() {
                 <View className="flex-row mt-1 h-1.5 gap-1">
                   {dots.map((p, i) => (
                     <View key={i} className={`w-1.5 h-1.5 rounded-full ${
-                      p === 'high' ? 'bg-red-500' : p === 'medium' ? 'bg-amber-500' : 'bg-green-500'
+                      p === 'done' ? 'bg-green-500' : p === 'in_progress' ? 'bg-amber-500' : 'bg-blue-500'
                     }`} />
                   ))}
                 </View>
@@ -239,11 +241,10 @@ export default function CalendarScreen() {
             onPress={() => router.push(`/task/${item.id}` as any)}
             className="flex-row py-4 px-6 border-b border-gray-100 bg-white items-center"
           >
-            {/* Priority Pill */}
+            {/* Status Pill */}
             <View className={`w-1.5 h-10 rounded-full mr-4 ${
-              item.isCompleted ? 'bg-gray-300' : 
-              item.priority === 'high' ? 'bg-red-500' : 
-              item.priority === 'medium' ? 'bg-amber-500' : 'bg-green-500'
+              item.status === 'done' ? 'bg-green-500' : 
+              item.status === 'in_progress' ? 'bg-amber-500' : 'bg-blue-500'
             }`} />
             
             <View className="flex-1">
@@ -251,7 +252,7 @@ export default function CalendarScreen() {
                 {item.title}
               </Text>
               <Text className="text-xs text-textSecondary mt-1 font-medium">
-                {item.dueDate ? format(new Date(item.dueDate), 'hh:mm a', { locale: localeId }) : 'All Day'}
+                {item.dueDate ? format(new Date(item.dueDate), 'hh:mm a', { locale: localeId }) : 'All Day'} • #{categories.find(c => c.id === item.categoryId)?.name || 'Other'}
               </Text>
             </View>
             

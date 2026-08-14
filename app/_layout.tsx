@@ -6,11 +6,11 @@ import 'react-native-reanimated';
 import '../global.css';
 import * as Notifications from 'expo-notifications';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { useNotificationStore } from '../store/useNotificationStore';
 
 // Konfigurasi agar notifikasi tetap tampil (sebagai banner/suara) meskipun aplikasi sedang dibuka (foreground)
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
     shouldShowBanner: true,
@@ -52,6 +52,23 @@ export default function RootLayout() {
     }
   }, [isReady, hasOnboarded, segments]);
 
+  useEffect(() => {
+    // Bersihkan notifikasi lama (lebih dari 30 hari)
+    useNotificationStore.getState().cleanupOldNotifications();
+
+    // Listen for incoming notifications when app is running
+    const subscription = Notifications.addNotificationReceivedListener(notification => {
+      const { title, body } = notification.request.content;
+      if (title && body) {
+        useNotificationStore.getState().addNotification(title, body);
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -61,6 +78,7 @@ export default function RootLayout() {
           <Stack.Screen name="task/new" options={{ presentation: 'modal', headerShown: false }} />
           <Stack.Screen name="task/[id]" options={{ headerShown: false }} />
           <Stack.Screen name="search" options={{ headerShown: false, animation: 'fade' }} />
+          <Stack.Screen name="notifications" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
         </Stack>
         <StatusBar style="auto" />

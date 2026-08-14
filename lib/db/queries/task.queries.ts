@@ -21,7 +21,8 @@ export const deleteTask = async (id: string) => {
 export const toggleTaskCompletion = async (id: string, isCompleted: boolean) => {
   return await db.update(tasks)
     .set({ 
-      isCompleted: isCompleted ? 1 : 0, 
+      isCompleted: isCompleted ? 1 : 0,
+      status: isCompleted ? 'done' : 'todo',
       completedAt: isCompleted ? Date.now() : null 
     })
     .where(eq(tasks.id, id))

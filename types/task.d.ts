@@ -13,6 +13,7 @@ export interface Task {
   dueDate?: number | null; // Timestamp
   reminderAt?: number | null; // Timestamp
   priority: "low" | "medium" | "high";
+  status: "todo" | "in_progress" | "done";
   isCompleted: boolean;
   completedAt?: number | null; // Timestamp
   orderIndex: number;

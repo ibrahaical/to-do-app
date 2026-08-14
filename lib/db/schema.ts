@@ -15,6 +15,7 @@ export const tasks = sqliteTable("tasks", {
   dueDate: integer("due_date"),
   reminderAt: integer("reminder_at"),
   priority: text("priority").notNull().default("medium"),
+  status: text("status").notNull().default("todo"),
   isCompleted: integer("is_completed").notNull().default(0), // 0 for false, 1 for true
   completedAt: integer("completed_at"),
   orderIndex: integer("order_index").notNull().default(0),

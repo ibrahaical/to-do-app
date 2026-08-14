@@ -23,6 +23,7 @@ export const runMigrations = () => {
       due_date INTEGER,
       reminder_at INTEGER,
       priority TEXT NOT NULL DEFAULT 'medium',
+      status TEXT NOT NULL DEFAULT 'todo',
       is_completed INTEGER NOT NULL DEFAULT 0,
       completed_at INTEGER,
       order_index INTEGER NOT NULL DEFAULT 0,
@@ -47,6 +48,13 @@ export const runMigrations = () => {
   // Add category_id to tasks if it doesn't exist
   try {
     expoDb.execSync(`ALTER TABLE tasks ADD COLUMN category_id TEXT REFERENCES categories(id);`);
+  } catch (error) {
+    // Ignore error if column already exists
+  }
+
+  // Add status to tasks if it doesn't exist
+  try {
+    expoDb.execSync(`ALTER TABLE tasks ADD COLUMN status TEXT NOT NULL DEFAULT 'todo';`);
   } catch (error) {
     // Ignore error if column already exists
   }
