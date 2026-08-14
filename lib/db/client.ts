@@ -14,6 +14,7 @@ export const db = drizzle(expoDb, { schema });
  * karena kita tidak perlu mengelola file migrasi.
  */
 export const runMigrations = () => {
+  // Create tasks table if not exists
   expoDb.execSync(`
     CREATE TABLE IF NOT EXISTS tasks (
       id TEXT PRIMARY KEY NOT NULL,
@@ -31,4 +32,22 @@ export const runMigrations = () => {
       updated_at INTEGER NOT NULL
     );
   `);
+
+  // Create categories table if not exists
+  expoDb.execSync(`
+    CREATE TABLE IF NOT EXISTS categories (
+      id TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      color TEXT NOT NULL,
+      icon TEXT NOT NULL,
+      created_at INTEGER NOT NULL
+    );
+  `);
+
+  // Add category_id to tasks if it doesn't exist
+  try {
+    expoDb.execSync(`ALTER TABLE tasks ADD COLUMN category_id TEXT REFERENCES categories(id);`);
+  } catch (error) {
+    // Ignore error if column already exists
+  }
 };

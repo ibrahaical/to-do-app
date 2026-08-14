@@ -3,6 +3,7 @@ import { View, Text, Pressable } from 'react-native';
 import { Task } from '../../types/task';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import { useCategoryStore } from '../../store/useCategoryStore';
 
 interface TaskCardProps {
   task: Task;
@@ -12,6 +13,8 @@ interface TaskCardProps {
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onPress, onLongPress, isActive }) => {
+  const category = useCategoryStore(state => state.categories.find(c => c.id === task.categoryId));
+  
   const getPriorityColor = () => {
     switch (task.priority) {
       case 'high': return 'bg-priorityHigh';
@@ -45,8 +48,16 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onPress, onLongPress, 
           >
             {task.title}
           </Text>
-          {(task.dueDate || task.reminderAt) && (
-            <View className="flex-row items-center mt-1">
+          {(task.dueDate || task.reminderAt || category) && (
+            <View className="flex-row items-center mt-2 flex-wrap">
+              {category && (
+                <View className="flex-row items-center mr-3 bg-gray-100 px-2 py-0.5 rounded-md">
+                  <Ionicons name={category.icon as any} size={10} color={category.color} className="mr-1" />
+                  <Text style={{ color: category.color }} className="text-[10px] font-medium ml-1">
+                    {category.name}
+                  </Text>
+                </View>
+              )}
               {task.dueDate && (
                 <View className="flex-row items-center mr-3">
                   <Ionicons name="calendar-outline" size={12} color="#6B7684" className="mr-1" />

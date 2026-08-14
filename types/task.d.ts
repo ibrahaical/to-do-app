@@ -1,3 +1,11 @@
+export interface Category {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  createdAt: number;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -8,6 +16,7 @@ export interface Task {
   isCompleted: boolean;
   completedAt?: number | null; // Timestamp
   orderIndex: number;
+  categoryId?: string | null;
   category?: string | null;
   notificationId?: string | null;
   createdAt: number; // Timestamp

@@ -21,6 +21,8 @@ interface TaskState {
   toggleComplete: (id: string, currentStatus: boolean) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   reorderTasks: (reorderedTasks: Task[]) => Promise<void>;
+  clearCompletedTasks: () => Promise<void>;
+  clearAllData: () => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -152,7 +154,14 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   },
 
   reorderTasks: async (reorderedTasks) => {
-    const updates = reorderedTasks.map((t, index) => ({ id: t.id, orderIndex: index }));
+    // Ambil indeks asli dan urutkan dari terkecil ke terbesar
+    const originalIndices = reorderedTasks.map(t => t.orderIndex).sort((a, b) => a - b);
+    
+    // Terapkan indeks yang sudah diurutkan ke array yang baru di-reorder
+    const updates = reorderedTasks.map((t, index) => ({ 
+      id: t.id, 
+      orderIndex: originalIndices[index] ?? index // fallback if something goes wrong
+    }));
     
     // Optimistic update
     set((state) => {
@@ -170,6 +179,50 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       await TaskQueries.updateTaskOrders(updates);
     } catch (error) {
       console.error("Failed to reorder tasks:", error);
+      get().fetchTasks();
+    }
+  },
+
+  clearCompletedTasks: async () => {
+    // Cancel notifications if any completed task has one (though they shouldn't, but just in case)
+    const state = get();
+    const completedTasks = state.tasks.filter(t => t.isCompleted);
+    
+    for (const task of completedTasks) {
+      if (task.notificationId) {
+        await cancelTaskReminder(task.notificationId);
+      }
+    }
+
+    // Optimistic update
+    set((state) => ({
+      tasks: state.tasks.filter(t => !t.isCompleted)
+    }));
+
+    try {
+      await TaskQueries.deleteCompletedTasks();
+    } catch (error) {
+      console.error("Failed to clear completed tasks:", error);
+      get().fetchTasks();
+    }
+  },
+
+  clearAllData: async () => {
+    // Cancel all notifications
+    const state = get();
+    for (const task of state.tasks) {
+      if (task.notificationId) {
+        await cancelTaskReminder(task.notificationId);
+      }
+    }
+
+    // Optimistic update
+    set({ tasks: [] });
+
+    try {
+      await TaskQueries.deleteAllTasks();
+    } catch (error) {
+      console.error("Failed to clear all data:", error);
       get().fetchTasks();
     }
   },

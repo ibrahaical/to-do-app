@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, Switch } from 'react-native';
+import { View, Text, TextInput, Pressable, Switch, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTaskStore } from '../../store/useTaskStore';
+import { useCategoryStore } from '../../store/useCategoryStore';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function NewTaskScreen() {
   const router = useRouter();
   const addTask = useTaskStore(state => state.addTask);
+  const categories = useCategoryStore(state => state.categories);
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<'low'|'medium'|'high'>('medium');
+  const [categoryId, setCategoryId] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState<Date | null>(new Date()); // Default hari ini
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [hasReminder, setHasReminder] = useState(false);
@@ -27,6 +31,7 @@ export default function NewTaskScreen() {
       title,
       description,
       priority,
+      categoryId,
       dueDate: finalDueDate,
       reminderAt: finalReminderAt
     });
@@ -79,6 +84,26 @@ export default function NewTaskScreen() {
           </Pressable>
         ))}
       </View>
+
+      <Text className="text-sm font-semibold text-textSecondary mb-2">KATEGORI (OPSIONAL)</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6">
+        {categories.map((c) => (
+          <Pressable
+            key={c.id}
+            onPress={() => setCategoryId(categoryId === c.id ? null : c.id)}
+            className={`flex-row items-center px-4 py-2 rounded-full mr-3 ${categoryId === c.id ? 'border' : 'bg-surface'}`}
+            style={{ 
+              backgroundColor: categoryId === c.id ? `${c.color}20` : undefined,
+              borderColor: categoryId === c.id ? c.color : undefined
+            }}
+          >
+            <Ionicons name={c.icon as any} size={16} color={categoryId === c.id ? c.color : '#94A3B8'} className="mr-2" />
+            <Text style={{ color: categoryId === c.id ? c.color : '#64748B' }} className="font-semibold">
+              {c.name}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
 
       <Text className="text-sm font-semibold text-textSecondary mb-2">TANGGAL TENGGAT (DUE DATE)</Text>
       <Pressable 

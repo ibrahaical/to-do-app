@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, TextInput, Alert } from 'react-native';
+import { View, Text, Pressable, TextInput, Alert, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTaskStore } from '../../store/useTaskStore';
+import { useCategoryStore } from '../../store/useCategoryStore';
 import * as Haptics from 'expo-haptics';
 
 export default function TaskDetailScreen() {
@@ -16,12 +17,16 @@ export default function TaskDetailScreen() {
   const toggleComplete = useTaskStore(state => state.toggleComplete);
   
   const task = tasks.find(t => t.id === id);
+  const categories = useCategoryStore(state => state.categories);
 
   const [title, setTitle] = useState(task?.title || '');
   const [notes, setNotes] = useState(task?.notes || '');
+  const [categoryId, setCategoryId] = useState<string | null>(task?.categoryId || null);
   const [dueDate, setDueDate] = useState<Date | null>(task?.dueDate ? new Date(task.dueDate) : null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  
+  const selectedCategory = categories.find(c => c.id === (isEditing ? categoryId : task?.categoryId));
 
   if (!task) {
     return (
@@ -43,6 +48,7 @@ export default function TaskDetailScreen() {
     await updateTask(task.id, { 
       title, 
       notes,
+      categoryId,
       dueDate: dueDate ? dueDate.getTime() : null
     });
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -106,6 +112,26 @@ export default function TaskDetailScreen() {
               textAlignVertical="top"
             />
             
+            <Text className="text-sm font-semibold text-textSecondary mb-2">KATEGORI</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+              {categories.map((c) => (
+                <Pressable
+                  key={c.id}
+                  onPress={() => setCategoryId(categoryId === c.id ? null : c.id)}
+                  className={`flex-row items-center px-4 py-2 rounded-full mr-3 ${categoryId === c.id ? 'border' : 'bg-gray-50'}`}
+                  style={{ 
+                    backgroundColor: categoryId === c.id ? `${c.color}20` : undefined,
+                    borderColor: categoryId === c.id ? c.color : undefined
+                  }}
+                >
+                  <Ionicons name={c.icon as any} size={16} color={categoryId === c.id ? c.color : '#94A3B8'} className="mr-2" />
+                  <Text style={{ color: categoryId === c.id ? c.color : '#64748B' }} className="font-semibold">
+                    {c.name}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            
             <Text className="text-sm font-semibold text-textSecondary mb-2">TANGGAL TENGGAT</Text>
             <Pressable 
               onPress={() => setShowDatePicker(true)}
@@ -131,6 +157,14 @@ export default function TaskDetailScreen() {
         ) : (
           <View>
             <Text className="text-2xl font-bold text-textPrimary mb-3">{task.title}</Text>
+            {selectedCategory && (
+              <View className="flex-row items-center self-start px-3 py-1 rounded-full mb-3" style={{ backgroundColor: `${selectedCategory.color}15` }}>
+                <Ionicons name={selectedCategory.icon as any} size={14} color={selectedCategory.color} className="mr-1.5" />
+                <Text style={{ color: selectedCategory.color }} className="font-semibold text-sm">
+                  {selectedCategory.name}
+                </Text>
+              </View>
+            )}
             {task.notes ? (
               <Text className="text-base text-textSecondary leading-relaxed bg-gray-50 p-4 rounded-xl">
                 {task.notes}

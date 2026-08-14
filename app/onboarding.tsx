@@ -28,27 +28,27 @@ export default function OnboardingScreen() {
   return (
     <SafeAreaView className="flex-1 bg-primary">
       <View className="flex-1 justify-center items-center px-8">
-        <Animated.View entering={FadeInDown.duration(800).springify()} className="w-32 h-32 bg-white/20 rounded-full items-center justify-center mb-8">
-          <Ionicons name="checkmark-done" size={72} color="#FFFFFF" />
+        <Animated.View entering={FadeInDown.duration(800).springify()} className="mb-6">
+          <Image 
+            source={require('../assets/images/trido-logo.png')} 
+            style={{ width: 120, height: 120, resizeMode: 'contain' }} 
+          />
         </Animated.View>
         
         <Animated.View entering={FadeInUp.duration(800).delay(200).springify()} className="items-center">
-          <Text className="text-4xl font-bold text-white text-center mb-4">
-            Kelola Waktumu,{'\n'}Raih Mimpimu.
+          <Text className="text-4xl font-bold text-white text-center mb-2">
+            Trido
           </Text>
-          <Text className="text-lg text-white/80 text-center leading-relaxed px-4">
+          <Text className="text-xl font-medium text-white/90 text-center mb-6">
+            to-do, done right
+          </Text>
+          <Text className="text-base text-white/80 text-center leading-relaxed px-4">
             Ubah tugas harianmu menjadi kemenangan kecil dengan pengalaman to-do list yang cantik dan intuitif.
           </Text>
         </Animated.View>
       </View>
 
       <Animated.View entering={FadeInUp.duration(800).delay(400).springify()} className="p-8 pb-12">
-        <View className="bg-white/10 p-4 rounded-2xl mb-8 flex-row items-center">
-          <Ionicons name="notifications" size={24} color="#FFF" />
-          <Text className="flex-1 ml-4 text-white/90 text-sm">
-            Kami membutuhkan izin notifikasi agar dapat mengingatkanmu sebelum tenggat waktu tugasmu habis.
-          </Text>
-        </View>
 
         <Pressable 
           onPress={requestPermissions}

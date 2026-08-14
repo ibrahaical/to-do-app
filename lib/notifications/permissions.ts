@@ -25,3 +25,11 @@ export async function requestNotificationPermission(): Promise<boolean> {
   
   return finalStatus === 'granted';
 }
+
+/**
+ * Mengecek status izin notifikasi tanpa meminta prompt baru.
+ */
+export async function checkNotificationPermission(): Promise<boolean> {
+  const { status } = await Notifications.getPermissionsAsync();
+  return status === 'granted';
+}

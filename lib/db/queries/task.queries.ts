@@ -38,3 +38,11 @@ export const updateTaskOrders = async (updates: { id: string, orderIndex: number
     )
   );
 };
+
+export const deleteCompletedTasks = async () => {
+  return await db.delete(tasks).where(eq(tasks.isCompleted, 1)).returning();
+};
+
+export const deleteAllTasks = async () => {
+  return await db.delete(tasks).returning();
+};

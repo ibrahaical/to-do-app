@@ -18,10 +18,11 @@ interface ProgressRingProps {
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-export const ProgressRing: React.FC<ProgressRingProps> = ({
+export const ProgressRing: React.FC<ProgressRingProps & { children?: React.ReactNode }> = ({
   progress,
   size = 64,
   strokeWidth = 6,
+  children
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
@@ -77,9 +78,11 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
           rotation="-90"
         />
       </Svg>
-      <Text className="text-xs font-bold text-textPrimary">
-        {percentage}%
-      </Text>
+      {children !== undefined ? children : (
+        <Text className="text-xs font-bold text-textPrimary">
+          {percentage}%
+        </Text>
+      )}
     </View>
   );
 };
