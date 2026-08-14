@@ -27,3 +27,14 @@ export const toggleTaskCompletion = async (id: string, isCompleted: boolean) => 
     .where(eq(tasks.id, id))
     .returning();
 };
+
+export const updateTaskOrders = async (updates: { id: string, orderIndex: number }[]) => {
+  // SQLite lokal sangat cepat, kita bisa gunakan Promise.all untuk batch update
+  await Promise.all(
+    updates.map(update => 
+      db.update(tasks)
+        .set({ orderIndex: update.orderIndex })
+        .where(eq(tasks.id, update.id))
+    )
+  );
+};

@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { Task, NewTaskInput, UpdateTaskInput } from '../types/task';
 import * as TaskQueries from '../lib/db/queries/task.queries';
 import { tasks } from '../lib/db/schema';
+import { scheduleTaskReminder, cancelTaskReminder } from '../lib/notifications/scheduler';
+import { randomUUID } from 'expo-crypto';
 
 // Helper to transform SQLite row to Task interface
 const mapDbRowToTask = (row: typeof tasks.$inferSelect): Task => ({
@@ -18,6 +20,7 @@ interface TaskState {
   updateTask: (id: string, input: UpdateTaskInput) => Promise<void>;
   toggleComplete: (id: string, currentStatus: boolean) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
+  reorderTasks: (reorderedTasks: Task[]) => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -37,23 +40,30 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   addTask: async (input) => {
     const now = Date.now();
-    const id = crypto.randomUUID();
+    const id = randomUUID();
     const newTask = {
       ...input,
       id,
+      priority: (input.priority || 'medium') as 'low' | 'medium' | 'high',
       isCompleted: 0,
       createdAt: now,
       updatedAt: now,
       orderIndex: input.orderIndex || 0,
     };
+    let notificationId: string | null = null;
+    if (input.reminderAt) {
+      notificationId = await scheduleTaskReminder(newTask as typeof tasks.$inferSelect);
+    }
+    
+    const finalTask = { ...newTask, notificationId };
     
     // Optistic update
     set((state) => ({ 
-      tasks: [mapDbRowToTask(newTask as typeof tasks.$inferSelect), ...state.tasks] 
+      tasks: [mapDbRowToTask(finalTask as typeof tasks.$inferSelect), ...state.tasks] 
     }));
 
     try {
-      await TaskQueries.insertTask(newTask as typeof tasks.$inferInsert);
+      await TaskQueries.insertTask(finalTask as typeof tasks.$inferInsert);
     } catch (error) {
       console.error("Failed to add task:", error);
       // Revert in real app, omitted for brevity here
@@ -62,11 +72,28 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   },
 
   updateTask: async (id, input) => {
-    const updateData = { ...input, updatedAt: Date.now() };
+    const state = get();
+    const oldTask = state.tasks.find(t => t.id === id);
+    
+    let notificationId = oldTask?.notificationId || null;
+    
+    // Jika waktu reminder berubah
+    if (input.reminderAt !== undefined && input.reminderAt !== oldTask?.reminderAt) {
+      if (oldTask?.notificationId) {
+        await cancelTaskReminder(oldTask.notificationId);
+      }
+      if (input.reminderAt) {
+        notificationId = await scheduleTaskReminder({ ...oldTask, ...input } as Task);
+      } else {
+        notificationId = null;
+      }
+    }
+
+    const updateData = { ...input, notificationId, updatedAt: Date.now() };
     
     // Optimistic update
     set((state) => ({
-      tasks: state.tasks.map(t => t.id === id ? { ...t, ...input, updatedAt: updateData.updatedAt } : t) as Task[]
+      tasks: state.tasks.map(t => t.id === id ? { ...t, ...input, notificationId, updatedAt: updateData.updatedAt } : t) as Task[]
     }));
 
     try {
@@ -78,8 +105,15 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   },
 
   toggleComplete: async (id, currentStatus) => {
+    const state = get();
+    const oldTask = state.tasks.find(t => t.id === id);
     const newStatus = !currentStatus;
     const completedAt = newStatus ? Date.now() : null;
+
+    if (newStatus && oldTask?.notificationId) {
+      // Jika diselesaikan, batalkan pengingat
+      await cancelTaskReminder(oldTask.notificationId);
+    }
 
     // Optimistic update
     set((state) => ({
@@ -97,6 +131,13 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   },
 
   deleteTask: async (id) => {
+    const state = get();
+    const oldTask = state.tasks.find(t => t.id === id);
+    
+    if (oldTask?.notificationId) {
+      await cancelTaskReminder(oldTask.notificationId);
+    }
+
     // Optimistic update
     set((state) => ({
       tasks: state.tasks.filter(t => t.id !== id)
@@ -106,6 +147,29 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       await TaskQueries.deleteTask(id);
     } catch (error) {
       console.error("Failed to delete task:", error);
+      get().fetchTasks();
+    }
+  },
+
+  reorderTasks: async (reorderedTasks) => {
+    const updates = reorderedTasks.map((t, index) => ({ id: t.id, orderIndex: index }));
+    
+    // Optimistic update
+    set((state) => {
+      const newTasks = [...state.tasks];
+      updates.forEach(update => {
+        const tIndex = newTasks.findIndex(t => t.id === update.id);
+        if (tIndex !== -1) {
+          newTasks[tIndex] = { ...newTasks[tIndex], orderIndex: update.orderIndex };
+        }
+      });
+      return { tasks: newTasks };
+    });
+
+    try {
+      await TaskQueries.updateTaskOrders(updates);
+    } catch (error) {
+      console.error("Failed to reorder tasks:", error);
       get().fetchTasks();
     }
   },
