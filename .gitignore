@@ -41,3 +41,14 @@ app-example
 # generated native folders
 /ios
 /android
+
+# NativeWind
+nativewind-env.d.ts
+
+# Local Database (SQLite)
+*.db
+*.db-journal
+
+# Environment variables
+.env
+.env.*
