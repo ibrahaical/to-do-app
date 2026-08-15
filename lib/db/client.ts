@@ -58,4 +58,16 @@ export const runMigrations = () => {
   } catch (error) {
     // Ignore error if column already exists
   }
+
+  // Create indexes for optimal query speed (O(log N) lookups)
+  try {
+    expoDb.execSync(`
+      CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
+      CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+      CREATE INDEX IF NOT EXISTS idx_tasks_is_completed ON tasks(is_completed);
+      CREATE INDEX IF NOT EXISTS idx_tasks_order_index ON tasks(order_index);
+    `);
+  } catch (error) {
+    // Ignore error if indexes already exist
+  }
 };

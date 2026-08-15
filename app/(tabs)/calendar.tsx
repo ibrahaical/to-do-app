@@ -236,6 +236,10 @@ export default function CalendarScreen() {
         data={selectedTasks}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 100 }}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        initialNumToRender={8}
         renderItem={({ item }) => (
           <Pressable 
             onPress={() => router.push(`/task/${item.id}` as any)}
@@ -252,7 +256,7 @@ export default function CalendarScreen() {
                 {item.title}
               </Text>
               <Text className="text-xs text-textSecondary mt-1 font-medium">
-                {item.dueDate ? format(new Date(item.dueDate), 'hh:mm a', { locale: localeId }) : 'All Day'} • #{categories.find(c => c.id === item.categoryId)?.name || 'Other'}
+                {format(new Date(item.dueDate!), 'hh:mm a', { locale: localeId })} • #{categories.find(c => c.id === item.categoryId)?.name || 'Other'}
               </Text>
             </View>
             

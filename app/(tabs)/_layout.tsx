@@ -12,22 +12,23 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#0284C7', // Tailwind sky-600
         tabBarInactiveTintColor: '#94A3B8', // Tailwind slate-400
         headerShown: false,
+        tabBarShowLabel: true,
         tabBarStyle: {
           borderTopWidth: 0,
           elevation: 10,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.1,
+          shadowOpacity: 0.08,
           shadowRadius: 4,
           backgroundColor: '#FFFFFF',
           height: Platform.OS === 'ios' ? 88 : 68,
           paddingBottom: Platform.OS === 'ios' ? 28 : 12,
-          paddingTop: 12,
+          paddingTop: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-          marginTop: 4,
+          fontSize: 10,
+          fontWeight: '600',
+          marginTop: 2,
         },
       }}>
       <Tabs.Screen
@@ -40,11 +41,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="task"
+        name="calendar"
         options={{
-          title: 'Task',
+          title: 'Calendar',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="list-outline" size={size} color={color} />
+            <Ionicons name="calendar-outline" size={size} color={color} />
           ),
         }}
       />
@@ -62,46 +63,40 @@ export default function TabLayout() {
         }}
         options={{
           title: '',
+          tabBarLabel: () => null,
           tabBarIcon: () => (
             <View 
               style={{ 
-                width: 56, 
-                height: 56, 
+                width: 44, 
+                height: 44, 
                 backgroundColor: '#0284C7', 
-                borderRadius: 28, 
+                borderRadius: 22, 
                 alignItems: 'center', 
                 justifyContent: 'center',
-                top: -15,
-                borderWidth: 4,
-                borderColor: '#FFFFFF',
-                shadowColor: '#0284C7',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 4,
-                elevation: 5
               }}
             >
-              <Ionicons name="add" size={32} color="#FFFFFF" />
+              <Ionicons name="add" size={24} color="#FFFFFF" />
             </View>
           ),
         }}
       />
 
       <Tabs.Screen
-        name="calendar"
+        name="task"
         options={{
-          title: 'Calendar',
+          title: 'Task',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" size={size} color={color} />
+            <Ionicons name="list-outline" size={size} color={color} />
           ),
         }}
       />
+      
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: 'Profile',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
+            <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
       />

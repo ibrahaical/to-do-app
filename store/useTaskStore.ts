@@ -57,7 +57,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     };
     let notificationId: string | null = null;
     if (input.reminderAt) {
-      notificationId = await scheduleTaskReminder(newTask as typeof tasks.$inferSelect);
+      notificationId = await scheduleTaskReminder(newTask as unknown as Task);
     }
     
     const finalTask = { ...newTask, notificationId };

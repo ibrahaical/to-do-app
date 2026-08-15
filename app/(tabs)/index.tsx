@@ -32,22 +32,32 @@ export default function TaskScreen() {
     seedCategories().then(() => fetchCategories());
   }, []);
 
-  // Filter for today's list
-  const todayMs = endOfToday().getTime();
-  const todayTasks = tasks.filter(t => !t.dueDate || t.dueDate <= todayMs);
-  const activeTasks = todayTasks.filter(t => !t.isCompleted).sort((a, b) => (a.dueDate || 0) - (b.dueDate || 0));
-  
-  // Progress (Based on ALL tasks)
-  const allCount = tasks.length;
-  const completedCount = tasks.filter(t => t.isCompleted).length;
-  
-  const todoCount = tasks.filter(t => t.status === 'todo').length;
-  const inProgressCount = tasks.filter(t => t.status === 'in_progress').length;
-  const doneCount = tasks.filter(t => t.status === 'done').length;
+  // Filter for today's list & progress counts (Memoized to eliminate redundant recalculations)
+  const { todayTasks, activeTasks, allCount, completedCount, todoCount, inProgressCount, doneCount, progressRatio } = useMemo(() => {
+    const todayMs = endOfToday().getTime();
+    const today = tasks.filter(t => !t.dueDate || t.dueDate <= todayMs);
+    const active = today.filter(t => !t.isCompleted).sort((a, b) => (a.dueDate || 0) - (b.dueDate || 0));
+    
+    const all = tasks.length;
+    const completed = tasks.filter(t => t.isCompleted).length;
+    const todo = tasks.filter(t => t.status === 'todo').length;
+    const inProgress = tasks.filter(t => t.status === 'in_progress').length;
+    const done = tasks.filter(t => t.status === 'done').length;
+    const ratio = all > 0 ? completed / all : 0;
 
-  const progressRatio = allCount > 0 ? completedCount / allCount : 0;
+    return {
+      todayTasks: today,
+      activeTasks: active,
+      allCount: all,
+      completedCount: completed,
+      todoCount: todo,
+      inProgressCount: inProgress,
+      doneCount: done,
+      progressRatio: ratio,
+    };
+  }, [tasks]);
 
-  const firstName = userName.split(' ')[0];
+  const firstName = userName ? userName.split(' ')[0] : 'User';
 
   return (
     <SafeAreaView className="flex-1 bg-background pt-4">
@@ -75,7 +85,7 @@ export default function TaskScreen() {
         <ProgressRing progress={progressRatio} size={240} strokeWidth={5}>
           <View className="items-center justify-center">
             <Text className="text-6xl font-light text-textPrimary" style={{ fontWeight: '300' }}>
-              {Math.round(progressRatio * 100)}<Text className="text-3xl">%</Text>
+              {Math.floor(progressRatio * 100)}<Text className="text-3xl">%</Text>
             </Text>
             <Text className="text-xs text-textSecondary mt-1 font-medium tracking-wider uppercase">
               {completedCount} of {allCount} completed
@@ -89,7 +99,7 @@ export default function TaskScreen() {
         <View className="flex-row justify-between items-center mb-4">
           <Text className="text-xs font-bold text-textSecondary uppercase tracking-wider">Status</Text>
           <Pressable onPress={() => router.push('/task')}>
-            <Text className="text-sm font-semibold text-primary underline">See All</Text>
+            <Text className="text-sm font-semibold text-primary">See All</Text>
           </Pressable>
         </View>
         <View className="flex-col gap-4">
@@ -97,13 +107,13 @@ export default function TaskScreen() {
           <View>
             <View className="flex-row items-center mb-1.5">
               <View className="w-2 h-2 rounded-full bg-blue-500 mr-2" />
-              <Text className="text-sm font-semibold text-textPrimary">To Do ({todoCount}/{allCount})</Text>
+              <Text className="text-sm font-semibold text-textPrimary">To Do ({todoCount})</Text>
             </View>
             <View className="flex-row items-center">
               <View className="flex-1 h-1.5 bg-gray-100 rounded-full mr-3 overflow-hidden">
                 <View className="h-full bg-blue-500 rounded-full" style={{ width: `${allCount ? (todoCount/allCount)*100 : 0}%` }} />
               </View>
-              <Text className="text-xs font-medium text-textSecondary">{allCount ? Math.round((todoCount/allCount)*100) : 0}%</Text>
+              <Text className="text-xs font-medium text-textSecondary">{allCount ? Math.floor((todoCount/allCount)*100) : 0}%</Text>
             </View>
           </View>
 
@@ -111,13 +121,13 @@ export default function TaskScreen() {
           <View>
             <View className="flex-row items-center mb-1.5">
               <View className="w-2 h-2 rounded-full bg-amber-500 mr-2" />
-              <Text className="text-sm font-semibold text-textPrimary">In Progress ({inProgressCount}/{allCount})</Text>
+              <Text className="text-sm font-semibold text-textPrimary">In Progress ({inProgressCount})</Text>
             </View>
             <View className="flex-row items-center">
               <View className="flex-1 h-1.5 bg-gray-100 rounded-full mr-3 overflow-hidden">
                 <View className="h-full bg-amber-500 rounded-full" style={{ width: `${allCount ? (inProgressCount/allCount)*100 : 0}%` }} />
               </View>
-              <Text className="text-xs font-medium text-textSecondary">{allCount ? Math.round((inProgressCount/allCount)*100) : 0}%</Text>
+              <Text className="text-xs font-medium text-textSecondary">{allCount ? Math.floor((inProgressCount/allCount)*100) : 0}%</Text>
             </View>
           </View>
 
@@ -125,13 +135,13 @@ export default function TaskScreen() {
           <View>
             <View className="flex-row items-center mb-1.5">
               <View className="w-2 h-2 rounded-full bg-green-500 mr-2" />
-              <Text className="text-sm font-semibold text-textPrimary">Done ({doneCount}/{allCount})</Text>
+              <Text className="text-sm font-semibold text-textPrimary">Done ({doneCount})</Text>
             </View>
             <View className="flex-row items-center">
               <View className="flex-1 h-1.5 bg-gray-100 rounded-full mr-3 overflow-hidden">
                 <View className="h-full bg-green-500 rounded-full" style={{ width: `${allCount ? (doneCount/allCount)*100 : 0}%` }} />
               </View>
-              <Text className="text-xs font-medium text-textSecondary">{allCount ? Math.round((doneCount/allCount)*100) : 0}%</Text>
+              <Text className="text-xs font-medium text-textSecondary">{allCount ? Math.floor((doneCount/allCount)*100) : 0}%</Text>
             </View>
           </View>
         </View>
@@ -140,6 +150,13 @@ export default function TaskScreen() {
       {/* SUBHEADER */}
       <View className="px-6 py-4 flex-row justify-between items-center border-b border-gray-100 bg-white">
         <Text className="text-sm font-semibold text-textPrimary">Today task</Text>
+        <Pressable 
+          onPress={() => router.push('/task/new')}
+          className="flex-row items-center bg-primary/10 px-3 py-1.5 rounded-full"
+        >
+          <Ionicons name="add" size={16} color="#0284C7" />
+          <Text className="text-xs font-bold text-primary ml-1">Add Task</Text>
+        </Pressable>
       </View>
 
       {/* TASK LIST */}
@@ -149,6 +166,10 @@ export default function TaskScreen() {
             data={activeTasks}
             keyExtractor={item => item.id}
             contentContainerStyle={{ paddingBottom: 100 }}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            initialNumToRender={8}
             renderItem={({ item }) => (
               <Pressable 
                 onPress={() => router.push(`/task/${item.id}` as any)}

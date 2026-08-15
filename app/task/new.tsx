@@ -84,13 +84,16 @@ export default function NewTaskScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
         <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
 
-          {/* TITLE */}
+        {/* TITLE */}
         <TextInput
           className="text-2xl font-semibold text-textPrimary mt-4 mb-2 py-2 border-b border-gray-100"
           placeholder="Task title..."
           placeholderTextColor="#94A3B8"
           value={title}
           onChangeText={setTitle}
+          multiline
+          scrollEnabled={false}
+          textAlignVertical="top"
           autoFocus
         />
 

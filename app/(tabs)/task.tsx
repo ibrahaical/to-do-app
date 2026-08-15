@@ -118,7 +118,7 @@ export default function TaskListScreen() {
   }, [tasks, selectedStatusFilter, selectedCategoryFilter, selectedPriorityFilter, isSearching, searchQuery]);
 
   const hasFilter = selectedStatusFilter || selectedCategoryFilter || selectedPriorityFilter;
-  const isListEmpty = sections.length === 0;
+  const isListEmpty = sections.every(s => s.data.length === 0);
 
   // Styles
   const headerOpacityStyle = useAnimatedStyle(() => ({
@@ -242,6 +242,10 @@ export default function TaskListScreen() {
             )}
             contentContainerStyle={{ paddingBottom: 100 }}
             stickySectionHeadersEnabled={false}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            initialNumToRender={8}
           />
         )}
       </View>

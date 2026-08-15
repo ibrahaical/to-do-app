@@ -6,7 +6,7 @@ import { useTaskStore } from '../../store/useTaskStore';
 import { useCategoryStore } from '../../store/useCategoryStore';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
-import { format } from 'date-fns';
+import { format, isToday } from 'date-fns';
 import { enUS as localeId } from 'date-fns/locale';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -25,6 +25,7 @@ export default function TaskDetailScreen() {
 
   // States
   const [isEditing, setIsEditing] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.notes || '');
   const [status, setStatus] = useState<'todo'|'in_progress'|'done'>(task?.status || 'todo');
@@ -93,6 +94,22 @@ export default function TaskDetailScreen() {
     );
   };
 
+  const formattedDate = task.dueDate ? (
+    isToday(new Date(task.dueDate)) 
+      ? `Today, ${format(new Date(task.dueDate), 'd MMMM yyyy')}` 
+      : format(new Date(task.dueDate), 'EEEE, d MMMM yyyy')
+  ) : 'None';
+
+  const formattedTime = task.reminderAt 
+    ? format(new Date(task.reminderAt), 'hh:mm a') 
+    : 'None';
+
+  const priorityColorClass = task.priority === 'high' 
+    ? 'text-red-500' 
+    : task.priority === 'medium' 
+    ? 'text-amber-500' 
+    : 'text-green-500';
+
   return (
     <SafeAreaView className="flex-1 bg-background pt-4">
       {/* HEADER */}
@@ -113,19 +130,11 @@ export default function TaskDetailScreen() {
               <Text className={`font-semibold ${title.trim() ? 'text-white' : 'text-gray-400'}`}>Save</Text>
             </Pressable>
           ) : (
-            <Pressable onPress={() => {
-              // Reset edit state to match DB state in case it was discarded earlier
-              setTitle(task.title);
-              setDescription(task.notes || '');
-              setStatus(task.status);
-              setPriority(task.priority);
-              setCategoryId(task.categoryId || null);
-              setDueDate(task.dueDate ? new Date(task.dueDate) : null);
-              setHasReminder(!!task.reminderAt);
-              setReminderTime(task.reminderAt ? new Date(task.reminderAt) : null);
-              setIsEditing(true);
-            }} className="bg-sky-50 px-4 py-1.5 rounded-full">
-              <Text className="text-primary font-semibold">Edit</Text>
+            <Pressable 
+              onPress={() => setShowMenu(true)} 
+              className="w-10 h-10 bg-surface rounded-full items-center justify-center shadow-sm"
+            >
+              <Ionicons name="ellipsis-vertical" size={20} color="#0F172A" />
             </Pressable>
           )}
         </View>
@@ -144,6 +153,9 @@ export default function TaskDetailScreen() {
                 placeholderTextColor="#94A3B8"
                 value={title}
                 onChangeText={setTitle}
+                multiline
+                scrollEnabled={false}
+                textAlignVertical="top"
                 autoFocus
               />
 
@@ -266,102 +278,102 @@ export default function TaskDetailScreen() {
           ) : (
             // ================= VIEW MODE =================
             <View className="mt-4">
+              {/* TASK TITLE */}
               <Text className="text-2xl font-bold text-textPrimary mb-4">{task.title}</Text>
               
-              {/* Badges Container */}
-              <View className="flex-row flex-wrap gap-2 mb-6">
-                {/* Status Badge */}
-                <View className={`flex-row items-center px-3 py-1.5 rounded-full ${task.status === 'done' ? 'bg-green-100' : task.status === 'in_progress' ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                  <Ionicons name={task.status === 'done' ? 'checkmark-circle' : task.status === 'in_progress' ? 'time' : 'ellipse-outline'} size={14} color={task.status === 'done' ? '#10B981' : task.status === 'in_progress' ? '#3B82F6' : '#64748B'} className="mr-1.5" />
-                  <Text className={`font-semibold text-xs capitalize ${task.status === 'done' ? 'text-green-700' : task.status === 'in_progress' ? 'text-blue-700' : 'text-gray-600'}`}>
+              {/* METADATA LIST (Unboxed, evenly aligned) */}
+              <View className="mb-6 py-2 border-b border-gray-100">
+                {/* Status Row */}
+                <View className="flex-row items-center py-1.5">
+                  <View className="w-28 flex-row items-center">
+                    <Ionicons name="ellipse-outline" size={15} color="#94A3B8" className="mr-2" />
+                    <Text className="text-xs font-medium text-textSecondary">Status</Text>
+                  </View>
+                  <Text className="text-xs font-semibold text-textSecondary capitalize">
                     {task.status.replace('_', ' ')}
                   </Text>
                 </View>
-                
-                {/* Priority Badge */}
-                <View className={`flex-row items-center px-3 py-1.5 rounded-full ${task.priority === 'high' ? 'bg-red-100' : task.priority === 'medium' ? 'bg-orange-100' : 'bg-green-100'}`}>
-                  <Ionicons name="flag" size={14} color={task.priority === 'high' ? '#EF4444' : task.priority === 'medium' ? '#F59E0B' : '#10B981'} className="mr-1.5" />
-                  <Text className={`font-semibold text-xs capitalize ${task.priority === 'high' ? 'text-red-700' : task.priority === 'medium' ? 'text-orange-700' : 'text-green-700'}`}>
-                    {task.priority} Priority
+
+                {/* Date Row */}
+                <View className="flex-row items-center py-1.5">
+                  <View className="w-28 flex-row items-center">
+                    <Ionicons name="calendar-outline" size={15} color="#94A3B8" className="mr-2" />
+                    <Text className="text-xs font-medium text-textSecondary">Date</Text>
+                  </View>
+                  <Text className="text-xs font-semibold text-textSecondary">
+                    {formattedDate}
                   </Text>
                 </View>
 
-                {/* Category Badge */}
-                {selectedCat && (
-                  <View className="flex-row items-center px-3 py-1.5 rounded-full" style={{ backgroundColor: `${selectedCat.color}15` }}>
-                    <Ionicons name={selectedCat.icon as any} size={14} color={selectedCat.color} className="mr-1.5" />
-                    <Text style={{ color: selectedCat.color }} className="font-semibold text-xs">
-                      {selectedCat.name}
-                    </Text>
+                {/* Time Row */}
+                <View className="flex-row items-center py-1.5">
+                  <View className="w-28 flex-row items-center">
+                    <Ionicons name="time-outline" size={15} color="#94A3B8" className="mr-2" />
+                    <Text className="text-xs font-medium text-textSecondary">Time</Text>
                   </View>
-                )}
+                  <Text className="text-xs font-semibold text-textSecondary">
+                    {formattedTime}
+                  </Text>
+                </View>
+
+                {/* Priority Row */}
+                <View className="flex-row items-center py-1.5">
+                  <View className="w-28 flex-row items-center">
+                    <Ionicons name="flag-outline" size={15} color="#94A3B8" className="mr-2" />
+                    <Text className="text-xs font-medium text-textSecondary">Priority</Text>
+                  </View>
+                  <Text className={`text-xs font-bold capitalize ${priorityColorClass}`}>
+                    {task.priority}
+                  </Text>
+                </View>
+
+                {/* Category Row */}
+                <View className="flex-row items-center py-1.5">
+                  <View className="w-28 flex-row items-center">
+                    <Ionicons name="folder-outline" size={15} color="#94A3B8" className="mr-2" />
+                    <Text className="text-xs font-medium text-textSecondary">Category</Text>
+                  </View>
+                  {selectedCat ? (
+                    <View className="flex-row items-center">
+                      <Ionicons name={selectedCat.icon as any} size={13} color={selectedCat.color} className="mr-1.5" />
+                      <Text style={{ color: selectedCat.color }} className="text-xs font-semibold">
+                        {selectedCat.name}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text className="text-xs font-semibold text-textSecondary">None</Text>
+                  )}
+                </View>
               </View>
 
-              {/* Notes */}
-              <View className="mb-8">
+              {/* NOTES */}
+              <View className="mb-6">
                 <Text className="text-sm font-bold text-textSecondary mb-2 uppercase tracking-wider">Notes</Text>
-                <View className="bg-gray-50 p-4 rounded-2xl">
+                <View className="bg-gray-50 p-4 rounded-2xl border border-gray-100/60">
                   {task.notes ? (
                     <Text className="text-base text-textPrimary leading-relaxed">
                       {task.notes}
                     </Text>
                   ) : (
-                    <Text className="text-base text-gray-400 italic">No notes provided.</Text>
+                    <Text className="text-sm text-gray-400 italic">No notes provided.</Text>
                   )}
                 </View>
               </View>
 
-              {/* Due Date & Reminder */}
-              <View className="space-y-4 border-t border-gray-100 pt-6">
-                <View className="flex-row justify-between items-center">
-                  <View className="flex-row items-center">
-                    <View className="w-10 h-10 bg-sky-50 rounded-full items-center justify-center mr-3">
-                      <Ionicons name="calendar" size={20} color="#0284C7" />
-                    </View>
-                    <Text className="text-textSecondary font-medium">Due Date</Text>
-                  </View>
-                  <Text className="font-semibold text-textPrimary">
-                    {task.dueDate ? format(new Date(task.dueDate), 'd MMM yyyy', { locale: localeId }) : 'None'}
-                  </Text>
-                </View>
-                
-                {task.reminderAt && (
-                  <View className="flex-row justify-between items-center">
-                    <View className="flex-row items-center">
-                      <View className="w-10 h-10 bg-purple-50 rounded-full items-center justify-center mr-3">
-                        <Ionicons name="notifications" size={20} color="#9333EA" />
-                      </View>
-                      <Text className="text-textSecondary font-medium">Reminder</Text>
-                    </View>
-                    <Text className="font-semibold text-textPrimary">
-                      {format(new Date(task.reminderAt), 'hh:mm a', { locale: localeId })}
-                    </Text>
-                  </View>
-                )}
-              </View>
-
-              {/* Quick Actions */}
-              <View className="mt-8 border-t border-gray-100 pt-6">
-                <Text className="text-sm font-bold text-textSecondary mb-4 uppercase tracking-wider">Quick Actions</Text>
+              {/* QUICK ACTIONS */}
+              <View className="mt-2 pt-2">
+                <Text className="text-sm font-bold text-textSecondary mb-3 uppercase tracking-wider">Quick Actions</Text>
                 <Pressable 
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     toggleComplete(task.id, task.isCompleted);
                   }}
-                  className={`mb-3 py-4 rounded-xl flex-row justify-center items-center ${task.isCompleted ? 'bg-gray-100' : 'bg-primary'}`}
+                  className={`py-4 rounded-xl flex-row justify-center items-center ${task.isCompleted ? 'bg-gray-100' : 'bg-primary'}`}
                 >
                   <Ionicons name={task.isCompleted ? 'arrow-undo' : 'checkmark'} size={20} color={task.isCompleted ? '#64748B' : '#fff'} className="mr-2" />
                   <Text className={`font-bold ${task.isCompleted ? 'text-gray-600' : 'text-white'}`}>
                     {task.isCompleted ? 'Mark as Undone' : 'Mark as Done'}
                   </Text>
-                </Pressable>
-
-                <Pressable 
-                  onPress={handleDelete}
-                  className="py-4 rounded-xl flex-row justify-center items-center bg-red-50"
-                >
-                  <Ionicons name="trash" size={20} color="#EF4444" className="mr-2" />
-                  <Text className="font-bold text-red-500">Delete Task</Text>
                 </Pressable>
               </View>
             </View>
@@ -400,6 +412,60 @@ export default function TaskDetailScreen() {
           }}
         />
       )}
+
+      {/* 3-DOTS ACTION MENU MODAL */}
+      <Modal visible={showMenu} transparent animationType="fade">
+        <Pressable className="flex-1 bg-black/40 justify-end" onPress={() => setShowMenu(false)}>
+          <Animated.View 
+            entering={SlideInDown} 
+            exiting={SlideOutDown}
+            className="bg-white rounded-t-3xl p-6 pb-10"
+          >
+            <View className="flex-row justify-between items-center mb-5">
+              <Text className="text-lg font-bold text-textPrimary">Task Options</Text>
+              <Pressable onPress={() => setShowMenu(false)}>
+                <Ionicons name="close-circle" size={24} color="#94A3B8" />
+              </Pressable>
+            </View>
+
+            <View className="space-y-3">
+              <Pressable 
+                onPress={() => {
+                  setShowMenu(false);
+                  setTitle(task.title);
+                  setDescription(task.notes || '');
+                  setStatus(task.status);
+                  setPriority(task.priority);
+                  setCategoryId(task.categoryId || null);
+                  setDueDate(task.dueDate ? new Date(task.dueDate) : null);
+                  setHasReminder(!!task.reminderAt);
+                  setReminderTime(task.reminderAt ? new Date(task.reminderAt) : null);
+                  setIsEditing(true);
+                }}
+                className="flex-row items-center p-4 bg-gray-50 rounded-2xl mb-3"
+              >
+                <View className="w-9 h-9 rounded-full bg-blue-50 items-center justify-center mr-3">
+                  <Ionicons name="create-outline" size={20} color="#0284C7" />
+                </View>
+                <Text className="text-base font-semibold text-textPrimary">Edit Task</Text>
+              </Pressable>
+
+              <Pressable 
+                onPress={() => {
+                  setShowMenu(false);
+                  handleDelete();
+                }}
+                className="flex-row items-center p-4 bg-red-50/70 rounded-2xl"
+              >
+                <View className="w-9 h-9 rounded-full bg-red-100 items-center justify-center mr-3">
+                  <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                </View>
+                <Text className="text-base font-semibold text-red-500">Delete Task</Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        </Pressable>
+      </Modal>
 
       {/* BOTTOM SHEET MODAL (EDIT MODE) */}
       <Modal visible={showSheet !== null} transparent animationType="fade">

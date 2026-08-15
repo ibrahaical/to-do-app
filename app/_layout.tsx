@@ -76,10 +76,9 @@ export default function RootLayout() {
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="task/new" options={{ presentation: 'modal', headerShown: false }} />
-          <Stack.Screen name="task/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="task/[id]" options={{ headerShown: false, animation: 'slide_from_right' }} />
           <Stack.Screen name="search" options={{ headerShown: false, animation: 'fade' }} />
-          <Stack.Screen name="notifications" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          <Stack.Screen name="notifications" options={{ headerShown: false, animation: 'slide_from_right' }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
