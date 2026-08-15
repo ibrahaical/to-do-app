@@ -103,7 +103,7 @@ export default function CalendarScreen() {
   }));
 
   return (
-    <SafeAreaView className="flex-1 bg-background pt-4">
+    <SafeAreaView className="flex-1 bg-white pt-4">
       {/* HEADER SECTION */}
       <View className="px-6 h-12 justify-center relative">
         {/* Normal Header */}
@@ -240,29 +240,56 @@ export default function CalendarScreen() {
         maxToRenderPerBatch={10}
         windowSize={5}
         initialNumToRender={8}
-        renderItem={({ item }) => (
-          <Pressable 
-            onPress={() => router.push(`/task/${item.id}` as any)}
-            className="flex-row py-4 px-6 border-b border-gray-100 bg-white items-center"
-          >
-            {/* Status Pill */}
-            <View className={`w-1.5 h-10 rounded-full mr-4 ${
-              item.status === 'done' ? 'bg-green-500' : 
-              item.status === 'in_progress' ? 'bg-amber-500' : 'bg-blue-500'
-            }`} />
-            
-            <View className="flex-1">
-              <Text className={`text-base font-semibold ${item.isCompleted ? 'text-gray-400 line-through' : 'text-textPrimary'}`}>
-                {item.title}
-              </Text>
-              <Text className="text-xs text-textSecondary mt-1 font-medium">
-                {format(new Date(item.dueDate!), 'hh:mm a', { locale: localeId })} • #{categories.find(c => c.id === item.categoryId)?.name || 'Other'}
-              </Text>
-            </View>
-            
-            <Ionicons name="chevron-forward" size={16} color="#CBD5E1" />
-          </Pressable>
-        )}
+        renderItem={({ item }) => {
+          const category = categories.find(c => c.id === item.categoryId);
+          const priorityColor = 
+            item.priority === 'high' ? '#EF4444' : 
+            item.priority === 'medium' ? '#F59E0B' : '#3B82F6';
+          const timeStr = item.time || (item.dueDate ? format(new Date(item.dueDate), 'hh:mm a', { locale: localeId }) : 'All Day');
+
+          return (
+            <Pressable 
+              onPress={() => router.push(`/task/${item.id}` as any)}
+              className="flex-row py-3.5 px-6 border-b border-gray-100 bg-white items-center"
+            >
+              {/* Vertical Status Bar */}
+              <View className={`w-[3px] h-9 rounded-full mr-3 ${
+                item.status === 'done' ? 'bg-green-500' : 
+                item.status === 'in_progress' ? 'bg-amber-500' : 'bg-blue-500'
+              }`} />
+              
+              {/* Title (with Priority Dot), Time & # Category */}
+              <View className="flex-1 mr-2">
+                {/* Title with Priority Dot */}
+                <View className="flex-row items-center">
+                  <View 
+                    style={{ backgroundColor: priorityColor }} 
+                    className="w-2 h-2 rounded-full mr-2" 
+                  />
+                  <Text 
+                    numberOfLines={1}
+                    className={`text-base font-semibold ${item.isCompleted ? 'text-gray-400 line-through' : 'text-textPrimary'} flex-1`}
+                  >
+                    {item.title}
+                  </Text>
+                </View>
+
+                {/* Subtitle: Time & # Category */}
+                <View className="flex-row items-center mt-0.5 ml-4">
+                  <Text className={`text-xs ${item.isCompleted ? 'text-gray-400' : 'text-textSecondary'} font-medium`}>
+                    {timeStr}
+                  </Text>
+                  <Text className="text-xs text-gray-300 mx-1.5">•</Text>
+                  <Text className={`text-xs ${item.isCompleted ? 'text-gray-400' : 'text-textSecondary'} font-medium`}>
+                    #{category?.name || 'Other'}
+                  </Text>
+                </View>
+              </View>
+              
+              <Ionicons name="chevron-forward" size={16} color="#CBD5E1" />
+            </Pressable>
+          );
+        }}
         ListEmptyComponent={
           <View className="mt-8 items-center">
             <Text className="text-sm text-textSecondary font-medium">No task here</Text>

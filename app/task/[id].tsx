@@ -11,6 +11,25 @@ import { enUS as localeId } from 'date-fns/locale';
 import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
+// Helper to parse time string (e.g. "12:00 - 15:00" or "19:00") into Date objects for the pickers
+const parseTimeToDates = (timeStr?: string | null) => {
+  if (!timeStr) return { start: null, end: null };
+  const parts = timeStr.split('-').map(p => p.trim());
+  
+  const parsePart = (str: string) => {
+    if (!str) return null;
+    const [hours, minutes] = str.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return null;
+    const d = new Date();
+    d.setHours(hours, minutes, 0, 0);
+    return d;
+  };
+
+  const start = parts[0] ? parsePart(parts[0]) : null;
+  const end = parts[1] ? parsePart(parts[1]) : null;
+  return { start, end };
+};
+
 export default function TaskDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -22,6 +41,8 @@ export default function TaskDetailScreen() {
   const categories = useCategoryStore(state => state.categories);
   
   const task = tasks.find(t => t.id === id);
+
+  const initialTimes = parseTimeToDates(task?.time);
 
   // States
   const [isEditing, setIsEditing] = useState(false);
@@ -35,6 +56,11 @@ export default function TaskDetailScreen() {
   const [dueDate, setDueDate] = useState<Date | null>(task?.dueDate ? new Date(task.dueDate) : null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   
+  const [startTime, setStartTime] = useState<Date | null>(initialTimes.start);
+  const [endTime, setEndTime] = useState<Date | null>(initialTimes.end);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  
   const [hasReminder, setHasReminder] = useState(!!task?.reminderAt);
   const [reminderTime, setReminderTime] = useState<Date | null>(task?.reminderAt ? new Date(task.reminderAt) : null);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -43,7 +69,7 @@ export default function TaskDetailScreen() {
 
   if (!task) {
     return (
-      <View className="flex-1 justify-center items-center bg-background">
+      <View className="flex-1 justify-center items-center bg-white">
         <Text className="text-textPrimary">Task not found.</Text>
         <Pressable onPress={() => router.back()} className="mt-4 bg-primary px-4 py-2 rounded-lg">
           <Text className="text-white font-semibold">Back</Text>
@@ -57,6 +83,15 @@ export default function TaskDetailScreen() {
   const handleSave = async () => {
     if (!title.trim()) return;
     
+    let calculatedTime: string | null = null;
+    if (startTime && endTime) {
+      calculatedTime = `${format(startTime, 'HH:mm')} - ${format(endTime, 'HH:mm')}`;
+    } else if (startTime) {
+      calculatedTime = format(startTime, 'HH:mm');
+    } else if (endTime) {
+      calculatedTime = format(endTime, 'HH:mm');
+    }
+
     const finalReminderAt = hasReminder && reminderTime ? reminderTime.getTime() : null;
     const finalDueDate = dueDate ? dueDate.getTime() : null;
     
@@ -64,9 +99,10 @@ export default function TaskDetailScreen() {
       title,
       notes: description,
       status,
-      isCompleted: status === 'done' ? 1 : 0, // Sync isCompleted with status
+      isCompleted: status === 'done', // Sync isCompleted with status
       priority,
       categoryId,
+      time: calculatedTime,
       dueDate: finalDueDate,
       reminderAt: finalReminderAt
     });
@@ -100,18 +136,18 @@ export default function TaskDetailScreen() {
       : format(new Date(task.dueDate), 'EEEE, d MMMM yyyy')
   ) : 'None';
 
-  const formattedTime = task.reminderAt 
+  const formattedTime = task.time || (task.reminderAt 
     ? format(new Date(task.reminderAt), 'hh:mm a') 
-    : 'None';
+    : 'None');
 
   const priorityColorClass = task.priority === 'high' 
     ? 'text-red-500' 
     : task.priority === 'medium' 
     ? 'text-amber-500' 
-    : 'text-green-500';
+    : 'text-blue-500';
 
   return (
-    <SafeAreaView className="flex-1 bg-background pt-4">
+    <SafeAreaView className="flex-1 bg-white pt-4">
       {/* HEADER */}
       <View className="px-6 h-12 flex-row justify-between items-center mb-2">
         <View className="flex-row items-center gap-2">
@@ -243,6 +279,46 @@ export default function TaskDetailScreen() {
                   <Ionicons name="chevron-down" size={16} color="#CBD5E1" />
                 </View>
               </Pressable>
+
+              {/* TIME ROW (INLINE START & END) */}
+              <View className="flex-row justify-between items-center py-4 border-b border-gray-100">
+                <View className="flex-row items-center">
+                  <Ionicons name="time-outline" size={20} color="#64748B" className="mr-3" />
+                  <Text className="text-base text-textPrimary">Time</Text>
+                </View>
+                <View className="flex-row items-center gap-1.5">
+                  {/* Start Time Pill */}
+                  <Pressable 
+                    onPress={() => setShowStartTimePicker(true)}
+                    className="px-2.5 py-1 bg-surface rounded-lg border border-gray-200"
+                  >
+                    <Text className={`text-sm font-semibold ${startTime ? 'text-textPrimary' : 'text-textSecondary'}`}>
+                      {startTime ? format(startTime, 'HH:mm') : '--:--'}
+                    </Text>
+                  </Pressable>
+
+                  <Text className="text-textSecondary font-bold text-xs">-</Text>
+
+                  {/* End Time Pill */}
+                  <Pressable 
+                    onPress={() => setShowEndTimePicker(true)}
+                    className="px-2.5 py-1 bg-surface rounded-lg border border-gray-200"
+                  >
+                    <Text className={`text-sm font-semibold ${endTime ? 'text-textPrimary' : 'text-textSecondary'}`}>
+                      {endTime ? format(endTime, 'HH:mm') : '--:--'}
+                    </Text>
+                  </Pressable>
+
+                  {(startTime || endTime) && (
+                    <Pressable 
+                      onPress={() => { setStartTime(null); setEndTime(null); }}
+                      className="ml-1 p-0.5"
+                    >
+                      <Ionicons name="close-circle" size={18} color="#94A3B8" />
+                    </Pressable>
+                  )}
+                </View>
+              </View>
 
               {/* REMINDER */}
               <View className="flex-row justify-between items-center py-4 border-b border-gray-100">
@@ -396,6 +472,38 @@ export default function TaskDetailScreen() {
         />
       )}
 
+      {/* START TIME PICKER */}
+      {showStartTimePicker && (
+        <DateTimePicker
+          value={startTime || new Date()}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowStartTimePicker(false);
+            if (event.type === 'set' && selectedDate) {
+              setStartTime(selectedDate);
+            }
+          }}
+        />
+      )}
+
+      {/* END TIME PICKER */}
+      {showEndTimePicker && (
+        <DateTimePicker
+          value={endTime || (startTime ? new Date(startTime.getTime() + 60 * 60 * 1000) : new Date())}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowEndTimePicker(false);
+            if (event.type === 'set' && selectedDate) {
+              setEndTime(selectedDate);
+            }
+          }}
+        />
+      )}
+
       {showTimePicker && (
         <DateTimePicker
           value={reminderTime || new Date(Date.now() + 15 * 60 * 1000)}
@@ -438,6 +546,9 @@ export default function TaskDetailScreen() {
                   setPriority(task.priority);
                   setCategoryId(task.categoryId || null);
                   setDueDate(task.dueDate ? new Date(task.dueDate) : null);
+                  const parsed = parseTimeToDates(task.time);
+                  setStartTime(parsed.start);
+                  setEndTime(parsed.end);
                   setHasReminder(!!task.reminderAt);
                   setReminderTime(task.reminderAt ? new Date(task.reminderAt) : null);
                   setIsEditing(true);

@@ -21,6 +21,7 @@ export const tasks = sqliteTable("tasks", {
   orderIndex: integer("order_index").notNull().default(0),
   categoryId: text("category_id").references(() => categories.id),
   category: text("category"), // Tetap dibiarkan untuk fallback atau migrasi data lama
+  time: text("time"), // Waktu custom misal '19:00' atau rentang '12:00-15:00'
   notificationId: text("notification_id"),
   createdAt: integer("created_at").notNull(),
   updatedAt: integer("updated_at").notNull(),

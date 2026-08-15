@@ -32,11 +32,11 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/trido-logo.png",
-          "imageWidth": 200,
+          "imageWidth": 120,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#0284C7",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#0284C7"
           }
         }
       ],

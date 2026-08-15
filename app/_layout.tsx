@@ -25,9 +25,10 @@ import { runMigrations } from '../lib/db/client';
 // Jalankan migrasi database segera saat modul dimuat (synchronous)
 runMigrations();
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import * as SplashScreen from 'expo-splash-screen';
+
+// Prevent splash screen from auto-hiding until ready, then hide immediately
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -37,8 +38,8 @@ export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Beri jeda kecil agar navigation tree siap
-    setTimeout(() => setIsReady(true), 100);
+    setIsReady(true);
+    SplashScreen.hideAsync().catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
+        <Stack initialRouteName={hasOnboarded ? '(tabs)' : 'onboarding'}>
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="task/new" options={{ presentation: 'modal', headerShown: false }} />

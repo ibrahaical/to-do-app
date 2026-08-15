@@ -163,7 +163,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   reorderTasks: async (reorderedTasks) => {
     // Ambil indeks asli dan urutkan dari terkecil ke terbesar
-    const originalIndices = reorderedTasks.map(t => t.orderIndex).sort((a, b) => a - b);
+    const originalIndices = reorderedTasks.map(t => t.orderIndex ?? 0).sort((a, b) => a - b);
     
     // Terapkan indeks yang sudah diurutkan ke array yang baru di-reorder
     const updates = reorderedTasks.map((t, index) => ({ 

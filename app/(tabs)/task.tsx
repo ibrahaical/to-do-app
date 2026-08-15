@@ -133,7 +133,7 @@ export default function TaskListScreen() {
   }));
 
   return (
-    <SafeAreaView className="flex-1 bg-background pt-4">
+    <SafeAreaView className="flex-1 bg-white pt-4">
       {/* HEADER SECTION */}
       <View className="px-6 h-12 justify-center relative">
         {/* Normal Header */}
@@ -201,7 +201,7 @@ export default function TaskListScreen() {
             sections={sections}
             keyExtractor={item => item.id}
             renderSectionHeader={({ section: { title } }) => (
-              <View className="bg-background pt-6 pb-2 px-6">
+              <View className="bg-white pt-6 pb-2 px-6">
                 <Text className="text-sm font-bold text-textPrimary">{title}</Text>
               </View>
             )}
@@ -212,34 +212,76 @@ export default function TaskListScreen() {
                 </View>
               ) : null
             )}
-            renderItem={({ item }) => (
-              <SwipeableRow
-                isCompleted={item.isCompleted}
-                onToggleComplete={() => toggleComplete(item.id, item.isCompleted)}
-                onDelete={() => deleteTask(item.id)}
-              >
-                <Pressable 
-                  onPress={() => router.push(`/task/${item.id}` as any)}
-                  className="flex-row py-3.5 px-6 items-center bg-white border-b border-gray-100"
+            renderItem={({ item }) => {
+              const category = categories.find(c => c.id === item.categoryId);
+              const priorityColor = 
+                item.priority === 'high' ? '#EF4444' : 
+                item.priority === 'medium' ? '#F59E0B' : '#3B82F6';
+              
+              const monthStr = item.dueDate ? format(new Date(item.dueDate), 'MMM', { locale: localeId }) : 'Any';
+              const dayStr = item.dueDate ? format(new Date(item.dueDate), 'd', { locale: localeId }) : '—';
+              const timeStr = item.time || (item.dueDate ? format(new Date(item.dueDate), 'hh:mm a', { locale: localeId }) : 'All Day');
+
+              return (
+                <SwipeableRow
+                  isCompleted={item.isCompleted}
+                  onToggleComplete={() => toggleComplete(item.id, item.isCompleted)}
+                  onDelete={() => deleteTask(item.id)}
                 >
-                  {/* Status Pill */}
-                  <View className={`w-1.5 h-10 rounded-full mr-4 ${
-                    item.status === 'done' ? 'bg-green-500' : 
-                    item.status === 'in_progress' ? 'bg-amber-500' : 'bg-blue-500'
-                  }`} />
-                  
-                  <View className="flex-1">
-                    <Text className={`text-base font-medium ${item.isCompleted ? 'text-gray-400 line-through' : 'text-textPrimary'}`}>
-                      {item.title}
-                    </Text>
-                    <Text className={`text-xs mt-0.5 ${item.isCompleted ? 'text-gray-400' : 'text-textSecondary'}`}>
-                      {item.dueDate ? format(new Date(item.dueDate), 'MMM d, hh:mm a', { locale: localeId }) : 'No Due Date'} • #{categories.find(c => c.id === item.categoryId)?.name || 'Other'}
-                    </Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={16} color="#CBD5E1" />
-                </Pressable>
-              </SwipeableRow>
-            )}
+                  <Pressable 
+                    onPress={() => router.push(`/task/${item.id}` as any)}
+                    className="flex-row py-3.5 px-5 items-center bg-white border-b border-gray-100"
+                  >
+                    {/* 1. Date Block (Month on top, Day number below) */}
+                    <View className="w-9 items-center justify-center mr-3">
+                      <Text className="text-[10px] font-bold text-textSecondary uppercase tracking-wider">
+                        {monthStr}
+                      </Text>
+                      <Text className="text-base font-extrabold text-textPrimary -mt-0.5">
+                        {dayStr}
+                      </Text>
+                    </View>
+
+                    {/* 2. Vertical Status Bar (Thinner) */}
+                    <View className={`w-[3px] h-9 rounded-full mr-3 ${
+                      item.status === 'done' ? 'bg-green-500' : 
+                      item.status === 'in_progress' ? 'bg-amber-500' : 'bg-blue-500'
+                    }`} />
+
+                    {/* 3. Title (with aligned Priority Dot), Time & # Category */}
+                    <View className="flex-1 mr-2">
+                      {/* Title with Priority Dot */}
+                      <View className="flex-row items-center">
+                        <View 
+                          style={{ backgroundColor: priorityColor }} 
+                          className="w-2 h-2 rounded-full mr-2" 
+                        />
+                        <Text 
+                          numberOfLines={1}
+                          className={`text-base font-semibold ${item.isCompleted ? 'text-gray-400 line-through' : 'text-textPrimary'} flex-1`}
+                        >
+                          {item.title}
+                        </Text>
+                      </View>
+
+                      {/* Subtitle: Time & # Category (Uncolored) */}
+                      <View className="flex-row items-center mt-0.5 ml-4">
+                        <Text className={`text-xs ${item.isCompleted ? 'text-gray-400' : 'text-textSecondary'} font-medium`}>
+                          {timeStr}
+                        </Text>
+                        <Text className="text-xs text-gray-300 mx-1.5">•</Text>
+                        <Text className={`text-xs ${item.isCompleted ? 'text-gray-400' : 'text-textSecondary'} font-medium`}>
+                          #{category?.name || 'Other'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* 4. Chevron Arrow */}
+                    <Ionicons name="chevron-forward" size={16} color="#CBD5E1" />
+                  </Pressable>
+                </SwipeableRow>
+              );
+            }}
             contentContainerStyle={{ paddingBottom: 100 }}
             stickySectionHeadersEnabled={false}
             removeClippedSubviews={true}

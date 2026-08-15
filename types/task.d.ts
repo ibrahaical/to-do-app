@@ -16,9 +16,10 @@ export interface Task {
   status: "todo" | "in_progress" | "done";
   isCompleted: boolean;
   completedAt?: number | null; // Timestamp
-  orderIndex: number;
+  orderIndex?: number;
   categoryId?: string | null;
   category?: string | null;
+  time?: string | null;
   notificationId?: string | null;
   createdAt: number; // Timestamp
   updatedAt: number; // Timestamp

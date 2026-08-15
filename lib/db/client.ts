@@ -59,6 +59,13 @@ export const runMigrations = () => {
     // Ignore error if column already exists
   }
 
+  // Add time to tasks if it doesn't exist
+  try {
+    expoDb.execSync(`ALTER TABLE tasks ADD COLUMN time TEXT;`);
+  } catch (error) {
+    // Ignore error if column already exists
+  }
+
   // Create indexes for optimal query speed (O(log N) lookups)
   try {
     expoDb.execSync(`

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { View, Text, Pressable, FlatList } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { endOfToday, format } from 'date-fns';
@@ -14,6 +14,7 @@ import { ProgressRing } from '../../components/animations/ProgressRing';
 
 export default function TaskScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   
   const tasks = useTaskStore(state => state.tasks);
   const fetchTasks = useTaskStore(state => state.fetchTasks);
@@ -60,49 +61,54 @@ export default function TaskScreen() {
   const firstName = userName ? userName.split(' ')[0] : 'User';
 
   return (
-    <SafeAreaView className="flex-1 bg-background pt-4">
-      {/* HEADER SECTION */}
-      <View className="px-6 h-12 justify-center">
-        <View className="flex-row justify-between items-center">
-          <View>
-            <Text className="text-xl font-bold text-textPrimary">Hello, {firstName} 👋</Text>
-            <Text className="text-xs text-textSecondary mt-0.5">Focus on what matters today.</Text>
+    <View className="flex-1 bg-white">
+      {/* HERO PROGRESS SECTION (STANDALONE CARD WITH CONTRAST SURFACE & ROUNDED BOTTOM) */}
+      <View style={{ paddingTop: insets.top + 8 }} className="bg-slate-50 rounded-b-[36px] pb-6 border-b border-gray-100 shadow-xs">
+        {/* HEADER SECTION */}
+        <View className="px-6 h-12 justify-center">
+          <View className="flex-row justify-between items-center">
+            <View>
+              <Text className="text-xl font-bold text-textPrimary">Hello, {firstName} 👋</Text>
+              <Text className="text-xs text-textSecondary mt-0.5">Focus on what matters today.</Text>
+            </View>
+            <Pressable 
+              onPress={() => router.push('/notifications')} 
+              className="w-10 h-10 bg-white rounded-full items-center justify-center shadow-xs relative border border-gray-100"
+            >
+              <Ionicons name="notifications-outline" size={20} color="#64748B" />
+              {hasUnread && (
+                <View className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white" />
+              )}
+            </Pressable>
           </View>
-          <Pressable 
-            onPress={() => router.push('/notifications')} 
-            className="w-10 h-10 bg-surface rounded-full items-center justify-center shadow-sm relative"
-          >
-            <Ionicons name="notifications-outline" size={20} color="#64748B" />
-            {hasUnread && (
-              <View className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white" />
-            )}
-          </Pressable>
+        </View>
+
+        {/* RING */}
+        <View className="items-center justify-center pt-4 pb-2">
+          <ProgressRing progress={progressRatio} size={230} strokeWidth={5}>
+            <View className="items-center justify-center">
+              <Text className="text-6xl font-light text-textPrimary" style={{ fontWeight: '300' }}>
+                {Math.floor(progressRatio * 100)}<Text className="text-3xl">%</Text>
+              </Text>
+              <Text className="text-xs text-textSecondary mt-1 font-medium tracking-wider uppercase">
+                {completedCount} of {allCount} completed
+              </Text>
+            </View>
+          </ProgressRing>
         </View>
       </View>
 
-      {/* HERO PROGRESS SECTION */}
-      <View className="items-center justify-center py-6">
-        <ProgressRing progress={progressRatio} size={240} strokeWidth={5}>
-          <View className="items-center justify-center">
-            <Text className="text-6xl font-light text-textPrimary" style={{ fontWeight: '300' }}>
-              {Math.floor(progressRatio * 100)}<Text className="text-3xl">%</Text>
-            </Text>
-            <Text className="text-xs text-textSecondary mt-1 font-medium tracking-wider uppercase">
-              {completedCount} of {allCount} completed
-            </Text>
-          </View>
-        </ProgressRing>
-      </View>
-
-      {/* STATUS BREAKDOWN SECTION */}
-      <View className="px-6 pb-6">
+      {/* LOWER SCREEN CONTAINER (WHITE BACKGROUND) */}
+      <View className="flex-1 bg-white">
+        {/* STATUS BREAKDOWN SECTION (BG WHITE SEPERTI TODAY TASK) */}
+        <View className="bg-white px-6 py-5 border-b border-gray-100">
         <View className="flex-row justify-between items-center mb-4">
           <Text className="text-xs font-bold text-textSecondary uppercase tracking-wider">Status</Text>
           <Pressable onPress={() => router.push('/task')}>
             <Text className="text-sm font-semibold text-primary">See All</Text>
           </Pressable>
         </View>
-        <View className="flex-col gap-4">
+        <View className="flex-col gap-3.5">
           {/* TO DO ROW */}
           <View>
             <View className="flex-row items-center mb-1.5">
@@ -160,47 +166,73 @@ export default function TaskScreen() {
       </View>
 
       {/* TASK LIST */}
-      <View className="flex-1 bg-white">
-        {!isLoading && (
-          <FlatList
-            data={activeTasks}
-            keyExtractor={item => item.id}
-            contentContainerStyle={{ paddingBottom: 100 }}
-            removeClippedSubviews={true}
-            maxToRenderPerBatch={10}
-            windowSize={5}
-            initialNumToRender={8}
-            renderItem={({ item }) => (
+      {!isLoading && (
+        <FlatList
+          data={activeTasks}
+          keyExtractor={item => item.id}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          initialNumToRender={8}
+          renderItem={({ item }) => {
+            const category = categories.find(c => c.id === item.categoryId);
+            const priorityColor = 
+              item.priority === 'high' ? '#EF4444' : 
+              item.priority === 'medium' ? '#F59E0B' : '#3B82F6';
+            const timeStr = item.time || (item.dueDate ? format(new Date(item.dueDate), 'hh:mm a', { locale: localeId }) : 'All Day');
+
+            return (
               <Pressable 
                 onPress={() => router.push(`/task/${item.id}` as any)}
-                className="flex-row py-4 px-6 border-b border-gray-100 items-center"
+                className="flex-row py-3.5 px-6 border-b border-gray-100 items-center bg-white"
               >
-                {/* Status Pill */}
-                <View className={`w-1.5 h-10 rounded-full mr-4 ${
+                {/* Vertical Status Bar */}
+                <View className={`w-[3px] h-9 rounded-full mr-3 ${
                   item.status === 'done' ? 'bg-green-500' : 
                   item.status === 'in_progress' ? 'bg-amber-500' : 'bg-blue-500'
                 }`} />
                 
-                <View className="flex-1">
-                  <Text className={`text-base font-semibold ${item.isCompleted ? 'text-gray-400 line-through' : 'text-textPrimary'}`}>
-                    {item.title}
-                  </Text>
-                  <Text className="text-xs text-textSecondary mt-1 font-medium">
-                    {item.dueDate ? format(new Date(item.dueDate), 'hh:mm a', { locale: localeId }) : 'All Day'} • #{categories.find(c => c.id === item.categoryId)?.name || 'Other'}
-                  </Text>
+                {/* Title (with Priority Dot), Time & # Category */}
+                <View className="flex-1 mr-2">
+                  {/* Title with Priority Dot */}
+                  <View className="flex-row items-center">
+                    <View 
+                      style={{ backgroundColor: priorityColor }} 
+                      className="w-2 h-2 rounded-full mr-2" 
+                    />
+                    <Text 
+                      numberOfLines={1}
+                      className={`text-base font-semibold ${item.isCompleted ? 'text-gray-400 line-through' : 'text-textPrimary'} flex-1`}
+                    >
+                      {item.title}
+                    </Text>
+                  </View>
+
+                  {/* Subtitle: Time & # Category */}
+                  <View className="flex-row items-center mt-0.5 ml-4">
+                    <Text className={`text-xs ${item.isCompleted ? 'text-gray-400' : 'text-textSecondary'} font-medium`}>
+                      {timeStr}
+                    </Text>
+                    <Text className="text-xs text-gray-300 mx-1.5">•</Text>
+                    <Text className={`text-xs ${item.isCompleted ? 'text-gray-400' : 'text-textSecondary'} font-medium`}>
+                      #{category?.name || 'Other'}
+                    </Text>
+                  </View>
                 </View>
                 
                 <Ionicons name="chevron-forward" size={16} color="#CBD5E1" />
               </Pressable>
-            )}
-            ListEmptyComponent={
-              <View className="mt-8 items-center">
-                <Text className="text-sm text-textSecondary font-medium">No task today</Text>
-              </View>
-            }
-          />
-        )}
+            );
+          }}
+          ListEmptyComponent={
+            <View className="mt-8 items-center">
+              <Text className="text-sm text-textSecondary font-medium">No task today</Text>
+            </View>
+          }
+        />
+      )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

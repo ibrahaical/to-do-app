@@ -16,7 +16,7 @@ export default function NotificationsScreen() {
   }, [markAllAsRead]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background pt-4">
+    <SafeAreaView className="flex-1 bg-white pt-4">
       {/* HEADER */}
       <View className="px-6 h-12 flex-row justify-between items-center mb-2">
         <View className="flex-row items-center gap-2">

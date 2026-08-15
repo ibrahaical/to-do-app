@@ -26,6 +26,11 @@ export default function NewTaskScreen() {
   const [dueDate, setDueDate] = useState<Date | null>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  
   const [hasReminder, setHasReminder] = useState(false);
   const [reminderTime, setReminderTime] = useState<Date | null>(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -44,15 +49,25 @@ export default function NewTaskScreen() {
   const handleSave = async () => {
     if (!title.trim()) return;
     
+    let calculatedTime: string | null = null;
+    if (startTime && endTime) {
+      calculatedTime = `${format(startTime, 'HH:mm')} - ${format(endTime, 'HH:mm')}`;
+    } else if (startTime) {
+      calculatedTime = format(startTime, 'HH:mm');
+    } else if (endTime) {
+      calculatedTime = format(endTime, 'HH:mm');
+    }
+
     const finalReminderAt = hasReminder && reminderTime ? reminderTime.getTime() : undefined;
     const finalDueDate = dueDate ? dueDate.getTime() : undefined;
     
     await addTask({
       title,
-      description,
+      notes: description,
       status,
       priority,
       categoryId,
+      time: calculatedTime,
       dueDate: finalDueDate,
       reminderAt: finalReminderAt
     });
@@ -63,7 +78,7 @@ export default function NewTaskScreen() {
   const selectedCat = categories.find(c => c.id === categoryId);
 
   return (
-    <SafeAreaView className="flex-1 bg-background pt-4">
+    <SafeAreaView className="flex-1 bg-white pt-4">
       {/* HEADER */}
       <View className="px-6 h-12 flex-row justify-between items-center mb-2">
         <View className="flex-row items-center gap-2">
@@ -195,6 +210,46 @@ export default function NewTaskScreen() {
           </View>
         </Pressable>
 
+        {/* TIME ROW (INLINE START & END) */}
+        <View className="flex-row justify-between items-center py-4 border-b border-gray-100">
+          <View className="flex-row items-center">
+            <Ionicons name="time-outline" size={20} color="#64748B" className="mr-3" />
+            <Text className="text-base text-textPrimary">Time</Text>
+          </View>
+          <View className="flex-row items-center gap-1.5">
+            {/* Start Time Pill */}
+            <Pressable 
+              onPress={() => setShowStartTimePicker(true)}
+              className="px-2.5 py-1 bg-surface rounded-lg border border-gray-200"
+            >
+              <Text className={`text-sm font-semibold ${startTime ? 'text-textPrimary' : 'text-textSecondary'}`}>
+                {startTime ? format(startTime, 'HH:mm') : '--:--'}
+              </Text>
+            </Pressable>
+
+            <Text className="text-textSecondary font-bold text-xs">-</Text>
+
+            {/* End Time Pill */}
+            <Pressable 
+              onPress={() => setShowEndTimePicker(true)}
+              className="px-2.5 py-1 bg-surface rounded-lg border border-gray-200"
+            >
+              <Text className={`text-sm font-semibold ${endTime ? 'text-textPrimary' : 'text-textSecondary'}`}>
+                {endTime ? format(endTime, 'HH:mm') : '--:--'}
+              </Text>
+            </Pressable>
+
+            {(startTime || endTime) && (
+              <Pressable 
+                onPress={() => { setStartTime(null); setEndTime(null); }}
+                className="ml-1 p-0.5"
+              >
+                <Ionicons name="close-circle" size={18} color="#94A3B8" />
+              </Pressable>
+            )}
+          </View>
+        </View>
+
         {/* REMINDER */}
         <View className="flex-row justify-between items-center py-4 border-b border-gray-100">
           <View className="flex-row items-center">
@@ -238,6 +293,38 @@ export default function NewTaskScreen() {
             setShowDatePicker(false);
             if (event.type === 'set' && selectedDate) {
               setDueDate(selectedDate);
+            }
+          }}
+        />
+      )}
+
+      {/* START TIME PICKER */}
+      {showStartTimePicker && (
+        <DateTimePicker
+          value={startTime || new Date()}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowStartTimePicker(false);
+            if (event.type === 'set' && selectedDate) {
+              setStartTime(selectedDate);
+            }
+          }}
+        />
+      )}
+
+      {/* END TIME PICKER */}
+      {showEndTimePicker && (
+        <DateTimePicker
+          value={endTime || (startTime ? new Date(startTime.getTime() + 60 * 60 * 1000) : new Date())}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowEndTimePicker(false);
+            if (event.type === 'set' && selectedDate) {
+              setEndTime(selectedDate);
             }
           }}
         />

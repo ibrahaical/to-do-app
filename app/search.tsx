@@ -33,7 +33,7 @@ export default function SearchScreen() {
   }, [query, tasks]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-white">
       {/* Header & Search Bar */}
       <View className="px-4 py-3 flex-row items-center border-b border-gray-100 bg-white">
         <Pressable onPress={() => router.back()} className="p-2 mr-2">
